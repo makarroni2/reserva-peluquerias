@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Peluquería Javier</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f8f5f2;
+            padding: 60px 20px;
+        }
+
+        h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 20px;
+        }
+
+        button {
+            background-color: #111;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        #reserva {
+            margin-top: 40px;
+        }
+
+        select,
+        input {
+            padding: 12px;
+            font-size: 16px;
+            margin: 5px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Peluquería Javier</h1>
+
+    <p>Reserva tu cita online</p>
+
+    <button onclick="mostrarReserva()">
+        Reservar cita
+    </button>
+
+
+    <div id="reserva" style="display: none;">
+
+        <h2>Reserva tu cita</h2>
+
+        <p>Elige un servicio:</p>
+
+        <select id="servicio">
+            <option value="">Selecciona un servicio</option>
+            <option value="Corte">Corte - 15 €</option>
+            <option value="Corte + barba">Corte + barba - 22 €</option>
+            <option value="Tinte">Tinte - 35 €</option>
+        </select>
+
+
+        <p>Elige una fecha:</p>
+
+        <input type="date" id="fecha">
+
+
+        <p>Elige una hora:</p>
+
+        <select id="hora">
+            <option value="">Selecciona una hora</option>
+            <option value="10:00">10:00</option>
+            <option value="11:00">11:00</option>
+            <option value="12:00">12:00</option>
+            <option value="17:00">17:00</option>
+            <option value="18:00">18:00</option>
+        </select>
+
+
+        <p>Tu nombre:</p>
+
+        <input
+            type="text"
+            id="nombre"
+            placeholder="Escribe tu nombre"
+        >
+
+
+        <p>Tu teléfono:</p>
+
+        <input
+            type="tel"
+            id="telefono"
+            placeholder="Escribe tu teléfono"
+        >
+
+        <br>
+
+        <button onclick="confirmarCita()">
+            Confirmar cita
+        </button>
+
+        <p id="mensaje"></p>
+
+    </div>
+
+
+    <script>
+
+        function mostrarReserva() {
+
+            document.getElementById("reserva").style.display = "block";
+
+        }
+
+
+        function confirmarCita() {
+
+            const servicio =
+                document.getElementById("servicio").value;
+
+            const fecha =
+                document.getElementById("fecha").value;
+
+            const hora =
+                document.getElementById("hora").value;
+
+            const nombre =
+                document.getElementById("nombre").value;
+
+            const telefono =
+                document.getElementById("telefono").value;
+
+
+            if (!servicio || !fecha || !hora || !nombre || !telefono) {
+
+                document.getElementById("mensaje").innerText =
+                    "Por favor, completa todos los campos.";
+
+                return;
+            }
+
+
+            document.getElementById("mensaje").innerText =
+                "✅ ¡Cita solicitada correctamente! " +
+                nombre +
+                ", te esperamos el " +
+                fecha +
+                " a las " +
+                hora +
+                ".";
+
+        }
+
+    </script>
+
+</body>
+
+</html>
