@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
 
@@ -5,111 +6,137 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Peluquería Javier</title>
+    <title>Peluquería Ane</title>
 
     <style>
         body {
             font-family: Arial, sans-serif;
+            background-color: #f5f1ed;
             text-align: center;
-            background-color: #f8f5f2;
-            padding: 60px 20px;
+            padding: 40px 20px;
         }
 
         h1 {
-            font-size: 42px;
+            font-size: 40px;
             margin-bottom: 10px;
         }
 
-        p {
+        .subtitulo {
             font-size: 20px;
+            margin-bottom: 30px;
         }
 
         button {
             background-color: #111;
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 18px;
+            padding: 15px 25px;
             border-radius: 10px;
+            font-size: 17px;
             cursor: pointer;
-            margin-top: 20px;
+        }
+
+        button:hover {
+            opacity: 0.8;
         }
 
         #reserva {
-            margin-top: 40px;
+            display: none;
+            background-color: white;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 30px;
+            border-radius: 15px;
         }
 
         select,
         input {
+            width: 90%;
+            max-width: 350px;
             padding: 12px;
-            font-size: 16px;
-            margin: 5px;
-            border-radius: 6px;
+            margin: 8px;
             border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        .campo {
+            margin-bottom: 20px;
+        }
+
+        #mensaje {
+            font-weight: bold;
+            margin-top: 20px;
         }
     </style>
 </head>
 
 <body>
 
-    <h1>Peluquería Javier</h1>
+    <h1>Peluquería Ane</h1>
 
-    <p>Reserva tu cita online</p>
+    <p class="subtitulo">
+        Reserva tu cita online
+    </p>
 
     <button onclick="mostrarReserva()">
         Reservar cita
     </button>
 
-
-    <div id="reserva" style="display: none;">
+    <div id="reserva">
 
         <h2>Reserva tu cita</h2>
 
-        <p>Elige un servicio:</p>
+        <div class="campo">
+            <p>Servicio</p>
 
-        <select id="servicio">
-            <option value="">Selecciona un servicio</option>
-            <option value="Corte">Corte - 15 €</option>
-            <option value="Corte + barba">Corte + barba - 22 €</option>
-            <option value="Tinte">Tinte - 35 €</option>
-        </select>
+            <select id="servicio">
+                <option value="">Selecciona un servicio</option>
+                <option value="Corte">Corte - 15 €</option>
+                <option value="Corte + barba">Corte + barba - 22 €</option>
+                <option value="Tinte">Tinte - 35 €</option>
+            </select>
+        </div>
 
+        <div class="campo">
+            <p>Fecha</p>
 
-        <p>Elige una fecha:</p>
+            <input type="date" id="fecha">
+        </div>
 
-        <input type="date" id="fecha">
+        <div class="campo">
+            <p>Hora</p>
 
+            <select id="hora">
+                <option value="">Selecciona una hora</option>
+                <option value="10:00">10:00</option>
+                <option value="11:00">11:00</option>
+                <option value="12:00">12:00</option>
+                <option value="17:00">17:00</option>
+                <option value="18:00">18:00</option>
+            </select>
+        </div>
 
-        <p>Elige una hora:</p>
+        <div class="campo">
+            <p>Nombre</p>
 
-        <select id="hora">
-            <option value="">Selecciona una hora</option>
-            <option value="10:00">10:00</option>
-            <option value="11:00">11:00</option>
-            <option value="12:00">12:00</option>
-            <option value="17:00">17:00</option>
-            <option value="18:00">18:00</option>
-        </select>
+            <input
+                type="text"
+                id="nombre"
+                placeholder="Tu nombre"
+            >
+        </div>
 
+        <div class="campo">
+            <p>Teléfono</p>
 
-        <p>Tu nombre:</p>
-
-        <input
-            type="text"
-            id="nombre"
-            placeholder="Escribe tu nombre"
-        >
-
-
-        <p>Tu teléfono:</p>
-
-        <input
-            type="tel"
-            id="telefono"
-            placeholder="Escribe tu teléfono"
-        >
-
-        <br>
+            <input
+                type="tel"
+                id="telefono"
+                placeholder="Tu teléfono"
+            >
+        </div>
 
         <button onclick="confirmarCita()">
             Confirmar cita
@@ -119,8 +146,23 @@
 
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
+
+        const SUPABASE_URL =
+            "https://gzizbwwqhogynshbyaem.supabase.co";
+
+        const SUPABASE_KEY =
+            "sb_publishable_UCOjOFLBWhvSNbH8mtGChA_Oix4NCYE";
+
+
+        const supabaseClient =
+            window.supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_KEY
+            );
+
 
         function mostrarReserva() {
 
@@ -129,7 +171,7 @@
         }
 
 
-        function confirmarCita() {
+        async function confirmarCita() {
 
             const servicio =
                 document.getElementById("servicio").value;
@@ -146,24 +188,66 @@
             const telefono =
                 document.getElementById("telefono").value;
 
+            const mensaje =
+                document.getElementById("mensaje");
 
-            if (!servicio || !fecha || !hora || !nombre || !telefono) {
 
-                document.getElementById("mensaje").innerText =
-                    "Por favor, completa todos los campos.";
+            if (
+                servicio === "" ||
+                fecha === "" ||
+                hora === "" ||
+                nombre === "" ||
+                telefono === ""
+            ) {
+
+                mensaje.innerText =
+                    "⚠️ Completa todos los campos.";
 
                 return;
             }
 
 
-            document.getElementById("mensaje").innerText =
-                "✅ ¡Cita solicitada correctamente! " +
-                nombre +
-                ", te esperamos el " +
-                fecha +
-                " a las " +
-                hora +
-                ".";
+            mensaje.innerText =
+                "Guardando cita...";
+
+
+            const { data, error } =
+                await supabaseClient
+                    .from("citas")
+                    .insert([
+                        {
+                            nombre: nombre,
+                            telefono: telefono,
+                            servicio: servicio,
+                            fecha: fecha,
+                            hora: hora
+                        }
+                    ])
+                    .select();
+
+
+            if (error) {
+
+                console.error("Error Supabase:", error);
+
+                mensaje.innerText =
+                    "❌ No se pudo guardar la cita.";
+
+                return;
+            }
+
+
+            console.log("Cita guardada:", data);
+
+            mensaje.innerText =
+                "✅ ¡Cita reservada correctamente!";
+
+
+            document.getElementById("servicio").value = "";
+            document.getElementById("fecha").value = "";
+            document.getElementById("hora").value = "";
+            document.getElementById("nombre").value = "";
+            document.getElementById("telefono").value = "";
 
         }
 
@@ -172,3 +256,4 @@
 </body>
 
 </html>
+```

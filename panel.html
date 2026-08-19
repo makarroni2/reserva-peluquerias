@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Panel - Peluquería Ane</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f1ed;
+            margin: 0;
+            padding: 30px 20px;
+        }
+
+        .contenedor {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .cita {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+
+        .cita h2 {
+            margin-top: 0;
+        }
+
+        .cita p {
+            margin: 8px 0;
+        }
+
+        .sin-citas {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .error {
+            background-color: #ffe5e5;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .cargando {
+            text-align: center;
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <div class="contenedor">
+
+        <h1>📅 Citas - Peluquería Ane</h1>
+
+        <div id="listaCitas">
+
+            <div class="cargando">
+                Cargando citas...
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Supabase -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+    <script>
+
+        // ==========================================
+        // SUPABASE
+        // ==========================================
+
+        const SUPABASE_URL = "https://gzizbwwqhogynshbyaem.supabase.co";
+
+        const SUPABASE_KEY = "sb_publishable_UCOjOFLBWhvSNbH8mtGChA_Oix4NCYE";
+
+
+        const supabaseClient =
+            window.supabase.createClient(
+                SUPABASE_URL,
+                SUPABASE_KEY
+            );
+
+
+        // ==========================================
+        // CARGAR CITAS
+        // ==========================================
+
+        async function cargarCitas() {
+
+            const lista =
+                document.getElementById("listaCitas");
+
+
+            const { data, error } =
+                await supabaseClient
+                    .from("citas")
+                    .select("*")
+                    .order("fecha", { ascending: true })
+                    .order("hora", { ascending: true });
+
+
+            if (error) {
+
+                console.error(error);
+
+                lista.innerHTML = `
+                    <div class="error">
+                        ❌ No se pudieron cargar las citas.
+                    </div>
+                `;
+
+                return;
+            }
+
+
+            if (!data || data.length === 0) {
+
+                lista.innerHTML = `
+                    <div class="sin-citas">
+                        <h2>No hay citas</h2>
+                        <p>Cuando un cliente reserve aparecerá aquí.</p>
+                    </div>
+                `;
+
+                return;
+            }
+
+
+            lista.innerHTML = "";
+
+
+            data.forEach(function(cita) {
+
+                lista.innerHTML += `
+
+                    <div class="cita">
+
+                        <h2>
+                            ${cita.hora} — ${cita.nombre}
+                        </h2>
+
+                        <p>
+                            📅 ${cita.fecha}
+                        </p>
+
+                        <p>
+                            ✂️ ${cita.servicio}
+                        </p>
+
+                        <p>
+                            📞 ${cita.telefono}
+                        </p>
+
+                    </div>
+
+                `;
+
+            });
+
+        }
+
+
+        // ==========================================
+        // EJECUTAR
+        // ==========================================
+
+        cargarCitas();
+
+    </script>
+
+
+</body>
+
+</html>
