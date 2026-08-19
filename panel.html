@@ -2,12 +2,20 @@
 <html lang="es">
 
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Panel - Peluquería Ane</title>
 
+
     <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
 
         body {
             font-family: Arial, sans-serif;
@@ -16,48 +24,325 @@
             padding: 30px 20px;
         }
 
-        .contenedor {
-            max-width: 800px;
-            margin: 0 auto;
-        }
 
-        h1 {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+        /* =========================
+           LOGIN
+        ========================= */
 
-        .cita {
+        #login {
+
+            max-width: 400px;
+
+            margin: 80px auto;
+
             background-color: white;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 15px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+
+            padding: 30px;
+
+            border-radius: 18px;
+
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+
+            text-align: center;
+
         }
 
-        .cita h2 {
+
+        #login h1 {
             margin-top: 0;
         }
 
-        .cita p {
-            margin: 8px 0;
+
+        #login p {
+            color: #666;
         }
+
+
+        #login input {
+
+            width: 100%;
+
+            padding: 14px;
+
+            margin: 8px 0;
+
+            border: 1px solid #ccc;
+
+            border-radius: 10px;
+
+            font-size: 16px;
+
+        }
+
+
+        #login button {
+
+            width: 100%;
+
+            padding: 14px;
+
+            margin-top: 10px;
+
+            background-color: #111;
+
+            color: white;
+
+            border: none;
+
+            border-radius: 10px;
+
+            font-size: 16px;
+
+            cursor: pointer;
+
+        }
+
+
+        #login button:hover {
+            opacity: 0.8;
+        }
+
+
+        #mensajeLogin {
+
+            margin-top: 15px;
+
+            font-weight: bold;
+
+        }
+
+
+        /* =========================
+           PANEL
+        ========================= */
+
+        #panel {
+            display: none;
+        }
+
+
+        .contenedor {
+
+            max-width: 800px;
+
+            margin: 0 auto;
+
+        }
+
+
+        header {
+
+            background-color: white;
+
+            padding: 25px;
+
+            border-radius: 18px;
+
+            margin-bottom: 25px;
+
+            text-align: center;
+
+        }
+
+
+        header h1 {
+            margin-top: 0;
+        }
+
+
+        #nombreNegocio {
+
+            font-size: 20px;
+
+            font-weight: bold;
+
+            margin-top: 10px;
+
+        }
+
+
+        #usuario {
+
+            color: #777;
+
+            font-size: 14px;
+
+            margin-top: 8px;
+
+        }
+
+
+        .acciones {
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 10px;
+
+            margin-top: 20px;
+
+            flex-wrap: wrap;
+
+        }
+
+
+        .acciones button {
+
+            border: none;
+
+            padding: 12px 18px;
+
+            border-radius: 10px;
+
+            cursor: pointer;
+
+            font-size: 15px;
+
+        }
+
+
+        .actualizar {
+
+            background-color: #111;
+
+            color: white;
+
+        }
+
+
+        .cerrar {
+
+            background-color: #eee;
+
+            color: #111;
+
+        }
+
+
+        /* =========================
+           RESUMEN
+        ========================= */
+
+        .resumen {
+
+            background-color: white;
+
+            padding: 20px;
+
+            border-radius: 18px;
+
+            margin-bottom: 20px;
+
+            text-align: center;
+
+        }
+
+
+        .numeroCitas {
+
+            font-size: 40px;
+
+            font-weight: bold;
+
+            margin-top: 5px;
+
+        }
+
+
+        /* =========================
+           CITAS
+        ========================= */
+
+        .cita {
+
+            background-color: white;
+
+            padding: 20px;
+
+            margin-bottom: 15px;
+
+            border-radius: 15px;
+
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+
+        }
+
+
+        .cita h2 {
+
+            margin-top: 5px;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .cita p {
+
+            margin: 8px 0;
+
+        }
+
+
+        .hora {
+
+            font-size: 24px;
+
+            font-weight: bold;
+
+        }
+
+
+        .estado {
+
+            display: inline-block;
+
+            margin-top: 10px;
+
+            padding: 6px 10px;
+
+            border-radius: 8px;
+
+            background-color: #e8f7e8;
+
+            font-size: 13px;
+
+        }
+
 
         .sin-citas {
+
             background-color: white;
+
             padding: 30px;
+
             border-radius: 15px;
+
             text-align: center;
+
         }
+
 
         .error {
+
             background-color: #ffe5e5;
+
             padding: 20px;
+
             border-radius: 10px;
+
             text-align: center;
+
         }
 
+
         .cargando {
+
             text-align: center;
+
+            padding: 30px;
+
         }
 
     </style>
@@ -67,130 +352,625 @@
 
 <body>
 
-    <div class="contenedor">
 
-        <h1>📅 Citas - Peluquería Ane</h1>
+<!-- ==================================================
+     LOGIN DEL PELUQUERO
+================================================== -->
 
-        <div id="listaCitas">
+<div id="login">
 
-            <div class="cargando">
-                Cargando citas...
-            </div>
+    <h1>💇 Panel del negocio</h1>
 
+    <p>
+        Acceso exclusivo para propietarios
+    </p>
+
+
+    <input
+        type="email"
+        id="email"
+        placeholder="Email"
+        autocomplete="email"
+    >
+
+
+    <input
+        type="password"
+        id="password"
+        placeholder="Contraseña"
+        autocomplete="current-password"
+    >
+
+
+    <button onclick="iniciarSesion()">
+        Iniciar sesión
+    </button>
+
+
+    <p id="mensajeLogin"></p>
+
+</div>
+
+
+
+<!-- ==================================================
+     PANEL DEL PELUQUERO
+================================================== -->
+
+<div
+    id="panel"
+    class="contenedor"
+>
+
+
+    <header>
+
+        <h1>
+            📅 Panel de gestión
+        </h1>
+
+
+        <div id="nombreNegocio">
+            Cargando negocio...
+        </div>
+
+
+        <div id="usuario">
+            Cargando usuario...
+        </div>
+
+
+        <div class="acciones">
+
+            <button
+                class="actualizar"
+                onclick="cargarCitas()"
+            >
+                🔄 Actualizar
+            </button>
+
+
+            <button
+                class="cerrar"
+                onclick="cerrarSesion()"
+            >
+                🚪 Cerrar sesión
+            </button>
+
+        </div>
+
+    </header>
+
+
+
+    <div class="resumen">
+
+        <div>
+            Citas
+        </div>
+
+
+        <div
+            class="numeroCitas"
+            id="numeroCitas"
+        >
+            0
         </div>
 
     </div>
 
 
-    <!-- Supabase -->
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <div id="listaCitas">
 
+        <div class="cargando">
+            Cargando citas...
+        </div>
 
-    <script>
-
-        // ==========================================
-        // SUPABASE
-        // ==========================================
-
-        const SUPABASE_URL = "https://gzizbwwqhogynshbyaem.supabase.co";
-
-        const SUPABASE_KEY = "sb_publishable_UCOjOFLBWhvSNbH8mtGChA_Oix4NCYE";
+    </div>
 
 
-        const supabaseClient =
-            window.supabase.createClient(
-                SUPABASE_URL,
-                SUPABASE_KEY
+</div>
+
+
+
+<!-- ==================================================
+     SUPABASE
+================================================== -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+
+<script>
+
+
+// ==================================================
+// CONFIGURACIÓN SUPABASE
+// ==================================================
+
+const SUPABASE_URL =
+    "https://gzizbwwqhogynshbyaem.supabase.co";
+
+
+const SUPABASE_KEY =
+    "sb_publishable_UCOjOFLBWhvSNbH8mtGChA_Oix4NCYE";
+
+
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+
+
+
+// ==================================================
+// LOGIN
+// ==================================================
+
+async function iniciarSesion() {
+
+
+    const email =
+        document.getElementById("email")
+            .value
+            .trim();
+
+
+    const password =
+        document.getElementById("password")
+            .value;
+
+
+    const mensaje =
+        document.getElementById(
+            "mensajeLogin"
+        );
+
+
+    if (
+        email === "" ||
+        password === ""
+    ) {
+
+        mensaje.innerText =
+            "⚠️ Introduce email y contraseña.";
+
+        return;
+
+    }
+
+
+    mensaje.innerText =
+        "Iniciando sesión...";
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient.auth.signInWithPassword({
+
+            email: email,
+
+            password: password
+
+        });
+
+
+    if (error) {
+
+        console.error(
+            "Error de inicio de sesión:",
+            error
+        );
+
+
+        mensaje.innerText =
+            "❌ " + error.message;
+
+        return;
+
+    }
+
+
+    mensaje.innerText = "";
+
+
+    mostrarPanel(
+        data.user
+    );
+
+}
+
+
+
+// ==================================================
+// MOSTRAR PANEL
+// ==================================================
+
+async function mostrarPanel(usuario) {
+
+
+    document.getElementById(
+        "login"
+    ).style.display = "none";
+
+
+    document.getElementById(
+        "panel"
+    ).style.display = "block";
+
+
+    document.getElementById(
+        "usuario"
+    ).innerText =
+        "Sesión iniciada: " + usuario.email;
+
+
+    await cargarNegocio();
+
+
+    await cargarCitas();
+
+}
+
+
+
+// ==================================================
+// OBTENER NEGOCIO DEL USUARIO
+// ==================================================
+
+async function cargarNegocio() {
+
+
+    const {
+        data: {
+            user
+        }
+    } =
+        await supabaseClient.auth.getUser();
+
+
+    if (!user) {
+        return;
+    }
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+
+            .from("negocio_usuarios")
+
+            .select("negocio_id")
+
+            .eq(
+                "usuario_id",
+                user.id
+            )
+
+            .maybeSingle();
+
+
+    if (error) {
+
+        console.error(
+            "Error obteniendo negocio:",
+            error
+        );
+
+
+        document.getElementById(
+            "nombreNegocio"
+        ).innerText =
+            "❌ Error obteniendo negocio.";
+
+        return;
+
+    }
+
+
+    if (!data) {
+
+        document.getElementById(
+            "nombreNegocio"
+        ).innerText =
+            "⚠️ Este usuario no tiene un negocio asignado.";
+
+        return;
+
+    }
+
+
+    const {
+        data: negocio,
+        error: errorNegocio
+    } =
+        await supabaseClient
+
+            .from("negocios")
+
+            .select("nombre")
+
+            .eq(
+                "id",
+                data.negocio_id
+            )
+
+            .maybeSingle();
+
+
+    if (errorNegocio) {
+
+        console.error(
+            "Error obteniendo nombre del negocio:",
+            errorNegocio
+        );
+
+        return;
+
+    }
+
+
+    if (negocio) {
+
+        document.getElementById(
+            "nombreNegocio"
+        ).innerText =
+            negocio.nombre;
+
+    }
+
+}
+
+
+
+// ==================================================
+// CARGAR CITAS
+// ==================================================
+
+async function cargarCitas() {
+
+
+    const lista =
+        document.getElementById(
+            "listaCitas"
+        );
+
+
+    const contador =
+        document.getElementById(
+            "numeroCitas"
+        );
+
+
+    lista.innerHTML = `
+
+        <div class="cargando">
+            Cargando citas...
+        </div>
+
+    `;
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+
+            .from("citas")
+
+            .select(
+                "id, nombre, telefono, servicio, fecha, hora, negocio_id"
+            )
+
+            .order(
+                "fecha",
+                {
+                    ascending: true
+                }
+            )
+
+            .order(
+                "hora",
+                {
+                    ascending: true
+                }
             );
 
 
-        // ==========================================
-        // CARGAR CITAS
-        // ==========================================
+    if (error) {
 
-        async function cargarCitas() {
-
-            const lista =
-                document.getElementById("listaCitas");
+        console.error(
+            "Error cargando citas:",
+            error
+        );
 
 
-            const { data, error } =
-                await supabaseClient
-                    .from("citas")
-                    .select("*")
-                    .order("fecha", { ascending: true })
-                    .order("hora", { ascending: true });
+        lista.innerHTML = `
+
+            <div class="error">
+
+                ❌ Error cargando citas.
+
+                <br><br>
+
+                ${error.message}
+
+            </div>
+
+        `;
 
 
-            if (error) {
+        contador.innerText = "0";
 
-                console.error(error);
+        return;
 
-                lista.innerHTML = `
-                    <div class="error">
-                        ❌ No se pudieron cargar las citas.
+    }
+
+
+    contador.innerText =
+        data.length;
+
+
+    if (data.length === 0) {
+
+        lista.innerHTML = `
+
+            <div class="sin-citas">
+
+                <h2>
+                    No hay citas
+                </h2>
+
+                <p>
+                    Cuando un cliente reserve,
+                    aparecerá aquí.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
+    lista.innerHTML = "";
+
+
+    data.forEach(
+        function(cita) {
+
+
+            lista.innerHTML += `
+
+                <div class="cita">
+
+                    <div class="hora">
+                        ${cita.hora}
                     </div>
-                `;
-
-                return;
-            }
 
 
-            if (!data || data.length === 0) {
-
-                lista.innerHTML = `
-                    <div class="sin-citas">
-                        <h2>No hay citas</h2>
-                        <p>Cuando un cliente reserve aparecerá aquí.</p>
-                    </div>
-                `;
-
-                return;
-            }
+                    <h2>
+                        ${cita.nombre}
+                    </h2>
 
 
-            lista.innerHTML = "";
+                    <p>
+                        📅 ${cita.fecha}
+                    </p>
 
 
-            data.forEach(function(cita) {
+                    <p>
+                        ✂️ ${cita.servicio}
+                    </p>
 
-                lista.innerHTML += `
 
-                    <div class="cita">
+                    <p>
+                        📞 ${cita.telefono}
+                    </p>
 
-                        <h2>
-                            ${cita.hora} — ${cita.nombre}
-                        </h2>
 
-                        <p>
-                            📅 ${cita.fecha}
-                        </p>
+                    <span class="estado">
+                        Reserva confirmada
+                    </span>
 
-                        <p>
-                            ✂️ ${cita.servicio}
-                        </p>
+                </div>
 
-                        <p>
-                            📞 ${cita.telefono}
-                        </p>
-
-                    </div>
-
-                `;
-
-            });
+            `;
 
         }
+    );
+
+}
 
 
-        // ==========================================
-        // EJECUTAR
-        // ==========================================
 
-        cargarCitas();
+// ==================================================
+// CERRAR SESIÓN
+// ==================================================
 
-    </script>
+async function cerrarSesion() {
+
+
+    await supabaseClient.auth.signOut();
+
+
+    document.getElementById(
+        "panel"
+    ).style.display = "none";
+
+
+    document.getElementById(
+        "login"
+    ).style.display = "block";
+
+
+    document.getElementById(
+        "password"
+    ).value = "";
+
+
+    document.getElementById(
+        "mensajeLogin"
+    ).innerText = "";
+
+}
+
+
+
+// ==================================================
+// COMPROBAR SI YA HAY SESIÓN
+// ==================================================
+
+async function comprobarSesion() {
+
+
+    const {
+        data: {
+            session
+        }
+    } =
+        await supabaseClient.auth.getSession();
+
+
+    if (session) {
+
+        mostrarPanel(
+            session.user
+        );
+
+    } else {
+
+        document.getElementById(
+            "login"
+        ).style.display = "block";
+
+
+        document.getElementById(
+            "panel"
+        ).style.display = "none";
+
+    }
+
+}
+
+
+
+// ==================================================
+// INICIAR
+// ==================================================
+
+comprobarSesion();
+
+
+</script>
 
 
 </body>
