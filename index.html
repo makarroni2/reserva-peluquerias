@@ -228,12 +228,21 @@
 
             if (error) {
 
-                console.error("Error Supabase:", error);
+    console.error("Error Supabase:", error);
 
-                mensaje.innerText =
-                    "❌ No se pudo guardar la cita.";
+    // Código 23505 = fecha y hora ya ocupadas
+    if (error.code === "23505") {
 
-                return;
+        mensaje.innerText =
+            "❌ Esa hora ya está ocupada. Elige otra.";
+
+        return;
+    }
+
+    mensaje.innerText =
+        "❌ No se pudo guardar la cita.";
+
+    return;
             }
 
 
