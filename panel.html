@@ -1,3 +1,4 @@
+html
 <!DOCTYPE html>
 <html lang="es">
 
@@ -5,17 +6,18 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Panel - Peluquería Ane</title>
-
 
     <style>
 
         * {
             box-sizing: border-box;
         }
-
 
         body {
             font-family: Arial, sans-serif;
@@ -24,93 +26,57 @@
             padding: 30px 20px;
         }
 
-
         /* =========================
            LOGIN
         ========================= */
 
         #login {
-
             max-width: 400px;
-
             margin: 80px auto;
-
             background-color: white;
-
             padding: 30px;
-
             border-radius: 18px;
-
             box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-
             text-align: center;
-
         }
-
 
         #login h1 {
             margin-top: 0;
         }
 
-
         #login p {
             color: #666;
         }
 
-
         #login input {
-
             width: 100%;
-
             padding: 14px;
-
             margin: 8px 0;
-
             border: 1px solid #ccc;
-
             border-radius: 10px;
-
             font-size: 16px;
-
         }
-
 
         #login button {
-
             width: 100%;
-
             padding: 14px;
-
             margin-top: 10px;
-
             background-color: #111;
-
             color: white;
-
             border: none;
-
             border-radius: 10px;
-
             font-size: 16px;
-
             cursor: pointer;
-
         }
-
 
         #login button:hover {
             opacity: 0.8;
         }
 
-
         #mensajeLogin {
-
             margin-top: 15px;
-
             font-weight: bold;
-
         }
-
 
         /* =========================
            PANEL
@@ -120,228 +86,288 @@
             display: none;
         }
 
-
         .contenedor {
-
-            max-width: 800px;
-
+            max-width: 900px;
             margin: 0 auto;
-
         }
-
 
         header {
-
             background-color: white;
-
             padding: 25px;
-
             border-radius: 18px;
-
             margin-bottom: 25px;
-
             text-align: center;
-
         }
-
 
         header h1 {
             margin-top: 0;
         }
 
-
         #nombreNegocio {
-
             font-size: 20px;
-
             font-weight: bold;
-
             margin-top: 10px;
-
         }
-
 
         #usuario {
-
             color: #777;
-
             font-size: 14px;
-
             margin-top: 8px;
-
         }
-
 
         .acciones {
-
             display: flex;
-
             justify-content: center;
-
             gap: 10px;
-
             margin-top: 20px;
-
             flex-wrap: wrap;
-
         }
-
 
         .acciones button {
-
             border: none;
-
             padding: 12px 18px;
-
             border-radius: 10px;
-
             cursor: pointer;
-
             font-size: 15px;
-
         }
-
 
         .actualizar {
-
             background-color: #111;
-
             color: white;
-
         }
-
 
         .cerrar {
-
             background-color: #eee;
-
             color: #111;
-
         }
-
 
         /* =========================
            RESUMEN
         ========================= */
 
-        .resumen {
-
-            background-color: white;
-
-            padding: 20px;
-
-            border-radius: 18px;
-
-            margin-bottom: 20px;
-
-            text-align: center;
-
+        .resumen-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
         }
 
+        .resumen {
+            background-color: white;
+            padding: 20px;
+            border-radius: 18px;
+            text-align: center;
+        }
 
         .numeroCitas {
-
             font-size: 40px;
-
             font-weight: bold;
-
             margin-top: 5px;
-
         }
 
+        /* =========================
+           FILTROS
+        ========================= */
+
+        .filtros {
+            background-color: white;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filtros button {
+            border: none;
+            padding: 11px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            background-color: #eee;
+            font-size: 14px;
+        }
+
+        .filtros button.activo {
+            background-color: #111;
+            color: white;
+        }
+
+        /* =========================
+           HORARIOS
+        ========================= */
+
+        .seccion {
+            background-color: white;
+            padding: 25px;
+            border-radius: 18px;
+            margin-bottom: 25px;
+        }
+
+        .seccion h2 {
+            margin-top: 0;
+        }
+
+        .horario-dia {
+            border-top: 1px solid #eee;
+            padding: 15px 0;
+        }
+
+        .horario-dia:first-child {
+            border-top: none;
+        }
+
+        .horario-cabecera {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .nombre-dia {
+            font-weight: bold;
+            min-width: 100px;
+        }
+
+        .horario-controles {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .horario-controles input[type="time"] {
+            padding: 9px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        .horario-controles label {
+            font-size: 14px;
+        }
+
+        .botonGuardarHorarios {
+            width: 100%;
+            margin-top: 20px;
+            padding: 14px;
+            background-color: #111;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .botonGuardarHorarios:hover {
+            opacity: 0.8;
+        }
+
+        #mensajeHorarios {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 15px;
+        }
 
         /* =========================
            CITAS
         ========================= */
 
         .cita {
-
             background-color: white;
-
             padding: 20px;
-
             margin-bottom: 15px;
-
             border-radius: 15px;
-
             box-shadow: 0 3px 10px rgba(0,0,0,0.08);
-
         }
 
-
-        .cita h2 {
-
-            margin-top: 5px;
-
-            margin-bottom: 12px;
-
+        .cabeceraCita {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
         }
-
-
-        .cita p {
-
-            margin: 8px 0;
-
-        }
-
 
         .hora {
-
-            font-size: 24px;
-
+            font-size: 26px;
             font-weight: bold;
-
         }
 
+        .fecha {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .cita h2 {
+            margin-top: 15px;
+            margin-bottom: 12px;
+        }
+
+        .cita p {
+            margin: 8px 0;
+        }
 
         .estado {
-
             display: inline-block;
-
             margin-top: 10px;
-
             padding: 6px 10px;
-
             border-radius: 8px;
-
             background-color: #e8f7e8;
-
             font-size: 13px;
-
         }
 
+        .botonCancelar {
+            margin-top: 15px;
+            background-color: #ffe5e5;
+            color: #b00000;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .botonCancelar:hover {
+            opacity: 0.8;
+        }
 
         .sin-citas {
-
             background-color: white;
-
             padding: 30px;
-
             border-radius: 15px;
-
             text-align: center;
-
         }
-
 
         .error {
-
             background-color: #ffe5e5;
-
             padding: 20px;
-
             border-radius: 10px;
-
             text-align: center;
-
         }
 
-
         .cargando {
-
             text-align: center;
-
             padding: 30px;
+            background-color: white;
+            border-radius: 15px;
+        }
+
+        @media (max-width: 600px) {
+
+            .resumen-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .horario-cabecera {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .horario-controles {
+                width: 100%;
+            }
 
         }
 
@@ -354,7 +380,7 @@
 
 
 <!-- ==================================================
-     LOGIN DEL PELUQUERO
+     LOGIN
 ================================================== -->
 
 <div id="login">
@@ -365,14 +391,12 @@
         Acceso exclusivo para propietarios
     </p>
 
-
     <input
         type="email"
         id="email"
         placeholder="Email"
         autocomplete="email"
     >
-
 
     <input
         type="password"
@@ -381,11 +405,9 @@
         autocomplete="current-password"
     >
 
-
     <button onclick="iniciarSesion()">
         Iniciar sesión
     </button>
-
 
     <p id="mensajeLogin"></p>
 
@@ -394,7 +416,7 @@
 
 
 <!-- ==================================================
-     PANEL DEL PELUQUERO
+     PANEL
 ================================================== -->
 
 <div
@@ -402,33 +424,28 @@
     class="contenedor"
 >
 
-
     <header>
 
         <h1>
             📅 Panel de gestión
         </h1>
 
-
         <div id="nombreNegocio">
             Cargando negocio...
         </div>
-
 
         <div id="usuario">
             Cargando usuario...
         </div>
 
-
         <div class="acciones">
 
             <button
                 class="actualizar"
-                onclick="cargarCitas()"
+                onclick="cargarTodo()"
             >
                 🔄 Actualizar
             </button>
-
 
             <button
                 class="cerrar"
@@ -443,23 +460,116 @@
 
 
 
-    <div class="resumen">
+    <!-- ==================================================
+         RESUMEN
+    ================================================== -->
 
-        <div>
-            Citas
+    <div class="resumen-grid">
+
+        <div class="resumen">
+
+            <div>
+                Citas de hoy
+            </div>
+
+            <div
+                class="numeroCitas"
+                id="citasHoy"
+            >
+                0
+            </div>
+
         </div>
 
+        <div class="resumen">
 
-        <div
-            class="numeroCitas"
-            id="numeroCitas"
-        >
-            0
+            <div>
+                Todas las citas
+            </div>
+
+            <div
+                class="numeroCitas"
+                id="numeroCitas"
+            >
+                0
+            </div>
+
         </div>
 
     </div>
 
 
+
+    <!-- ==================================================
+         HORARIOS
+    ================================================== -->
+
+    <div class="seccion">
+
+        <h2>
+            🕐 Horarios del negocio
+        </h2>
+
+        <p>
+            Configura los días y horas en los que atiende la peluquería.
+        </p>
+
+        <div id="listaHorarios">
+
+            <div class="cargando">
+                Cargando horarios...
+            </div>
+
+        </div>
+
+        <button
+            class="botonGuardarHorarios"
+            onclick="guardarHorarios()"
+        >
+            💾 Guardar horarios
+        </button>
+
+        <div id="mensajeHorarios"></div>
+
+    </div>
+
+
+
+    <!-- ==================================================
+         FILTROS
+    ================================================== -->
+
+    <div class="filtros">
+
+        <button
+            id="filtroHoy"
+            onclick="cambiarFiltro('hoy')"
+        >
+            Hoy
+        </button>
+
+        <button
+            id="filtroManana"
+            onclick="cambiarFiltro('manana')"
+        >
+            Mañana
+        </button>
+
+        <button
+            id="filtroTodas"
+            class="activo"
+            onclick="cambiarFiltro('todas')"
+        >
+            Todas
+        </button>
+
+    </div>
+
+
+
+    <!-- ==================================================
+         CITAS
+    ================================================== -->
 
     <div id="listaCitas">
 
@@ -468,7 +578,6 @@
         </div>
 
     </div>
-
 
 </div>
 
@@ -503,6 +612,30 @@ const supabaseClient =
     );
 
 
+let negocioId = null;
+
+let todasLasCitas = [];
+
+let filtroActual = "todas";
+
+
+
+// ==================================================
+// DÍAS
+// ==================================================
+
+const nombresDias = [
+    "",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+    "Domingo"
+];
+
+
 
 // ==================================================
 // LOGIN
@@ -510,23 +643,21 @@ const supabaseClient =
 
 async function iniciarSesion() {
 
-
     const email =
-        document.getElementById("email")
+        document
+            .getElementById("email")
             .value
             .trim();
 
-
     const password =
-        document.getElementById("password")
+        document
+            .getElementById("password")
             .value;
-
 
     const mensaje =
         document.getElementById(
             "mensajeLogin"
         );
-
 
     if (
         email === "" ||
@@ -540,23 +671,21 @@ async function iniciarSesion() {
 
     }
 
-
     mensaje.innerText =
         "Iniciando sesión...";
-
 
     const {
         data,
         error
     } =
-        await supabaseClient.auth.signInWithPassword({
+        await supabaseClient.auth
+            .signInWithPassword({
 
-            email: email,
+                email: email,
 
-            password: password
+                password: password
 
-        });
-
+            });
 
     if (error) {
 
@@ -565,7 +694,6 @@ async function iniciarSesion() {
             error
         );
 
-
         mensaje.innerText =
             "❌ " + error.message;
 
@@ -573,11 +701,9 @@ async function iniciarSesion() {
 
     }
 
-
     mensaje.innerText = "";
 
-
-    mostrarPanel(
+    await mostrarPanel(
         data.user
     );
 
@@ -591,51 +717,50 @@ async function iniciarSesion() {
 
 async function mostrarPanel(usuario) {
 
-
     document.getElementById(
         "login"
     ).style.display = "none";
-
 
     document.getElementById(
         "panel"
     ).style.display = "block";
 
-
     document.getElementById(
         "usuario"
     ).innerText =
-        "Sesión iniciada: " + usuario.email;
+        "Sesión iniciada: " +
+        usuario.email;
 
+    const negocioCorrecto =
+        await cargarNegocio();
 
-    await cargarNegocio();
+    if (!negocioCorrecto) {
+        return;
+    }
 
-
-    await cargarCitas();
+    await cargarTodo();
 
 }
 
 
 
 // ==================================================
-// OBTENER NEGOCIO DEL USUARIO
+// OBTENER NEGOCIO
 // ==================================================
 
 async function cargarNegocio() {
-
 
     const {
         data: {
             user
         }
     } =
-        await supabaseClient.auth.getUser();
-
+        await supabaseClient.auth
+            .getUser();
 
     if (!user) {
-        return;
+        return false;
     }
-
 
     const {
         data,
@@ -654,7 +779,6 @@ async function cargarNegocio() {
 
             .maybeSingle();
 
-
     if (error) {
 
         console.error(
@@ -662,16 +786,13 @@ async function cargarNegocio() {
             error
         );
 
-
         document.getElementById(
             "nombreNegocio"
         ).innerText =
             "❌ Error obteniendo negocio.";
 
-        return;
-
+        return false;
     }
-
 
     if (!data) {
 
@@ -680,10 +801,11 @@ async function cargarNegocio() {
         ).innerText =
             "⚠️ Este usuario no tiene un negocio asignado.";
 
-        return;
-
+        return false;
     }
 
+    negocioId =
+        data.negocio_id;
 
     const {
         data: negocio,
@@ -697,23 +819,20 @@ async function cargarNegocio() {
 
             .eq(
                 "id",
-                data.negocio_id
+                negocioId
             )
 
             .maybeSingle();
 
-
     if (errorNegocio) {
 
         console.error(
-            "Error obteniendo nombre del negocio:",
+            "Error obteniendo negocio:",
             errorNegocio
         );
 
-        return;
-
+        return false;
     }
-
 
     if (negocio) {
 
@@ -723,6 +842,463 @@ async function cargarNegocio() {
             negocio.nombre;
 
     }
+
+    return true;
+
+}
+
+
+
+// ==================================================
+// CARGAR TODO
+// ==================================================
+
+async function cargarTodo() {
+
+    await cargarHorarios();
+
+    await cargarCitas();
+
+}
+
+
+
+// ==================================================
+// CARGAR HORARIOS
+// ==================================================
+
+async function cargarHorarios() {
+
+    const contenedor =
+        document.getElementById(
+            "listaHorarios"
+        );
+
+    contenedor.innerHTML = `
+
+        <div class="cargando">
+            Cargando horarios...
+        </div>
+
+    `;
+
+    if (!negocioId) {
+
+        contenedor.innerHTML = `
+
+            <div class="error">
+                ❌ No se ha encontrado el negocio.
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+
+            .from("horarios")
+
+            .select(
+                "id, dia_semana, hora_inicio, hora_fin, activo"
+            )
+
+            .eq(
+                "negocio_id",
+                negocioId
+            )
+
+            .order(
+                "dia_semana",
+                {
+                    ascending: true
+                }
+            );
+
+    if (error) {
+
+        console.error(
+            "Error cargando horarios:",
+            error
+        );
+
+        contenedor.innerHTML = `
+
+            <div class="error">
+
+                ❌ Error cargando horarios.
+
+                <br><br>
+
+                ${error.message}
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+    contenedor.innerHTML = "";
+
+    for (
+        let dia = 1;
+        dia <= 7;
+        dia++
+    ) {
+
+        const horario =
+            (data || []).find(
+                function(item) {
+
+                    return item.dia_semana === dia;
+
+                }
+            );
+
+        const activo =
+            horario
+                ? horario.activo
+                : false;
+
+        const horaInicio =
+            horario
+                ? String(
+                    horario.hora_inicio
+                ).substring(0, 5)
+                : "09:00";
+
+        const horaFin =
+            horario
+                ? String(
+                    horario.hora_fin
+                ).substring(0, 5)
+                : "19:00";
+
+        const id =
+            horario
+                ? horario.id
+                : "";
+
+        contenedor.innerHTML += `
+
+            <div
+                class="horario-dia"
+                data-dia="${dia}"
+                data-id="${id}"
+            >
+
+                <div class="horario-cabecera">
+
+                    <div class="nombre-dia">
+                        ${nombresDias[dia]}
+                    </div>
+
+                    <div class="horario-controles">
+
+                        <label>
+
+                            <input
+                                type="checkbox"
+                                class="activoHorario"
+                                ${activo ? "checked" : ""}
+                            >
+
+                            Abierto
+
+                        </label>
+
+                        <input
+                            type="time"
+                            class="horaInicio"
+                            value="${horaInicio}"
+                        >
+
+                        <span>—</span>
+
+                        <input
+                            type="time"
+                            class="horaFin"
+                            value="${horaFin}"
+                        >
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+
+// ==================================================
+// GUARDAR HORARIOS
+// ==================================================
+
+async function guardarHorarios() {
+
+    const mensaje =
+        document.getElementById(
+            "mensajeHorarios"
+        );
+
+    if (!negocioId) {
+
+        mensaje.innerText =
+            "❌ No se ha encontrado el negocio.";
+
+        return;
+
+    }
+
+    mensaje.innerText =
+        "Guardando horarios...";
+
+    const filas =
+        document.querySelectorAll(
+            ".horario-dia"
+        );
+
+    for (
+        const fila of filas
+    ) {
+
+        const dia =
+            Number(
+                fila.dataset.dia
+            );
+
+        const id =
+            fila.dataset.id;
+
+        const activo =
+            fila.querySelector(
+                ".activoHorario"
+            ).checked;
+
+        const horaInicio =
+            fila.querySelector(
+                ".horaInicio"
+            ).value;
+
+        const horaFin =
+            fila.querySelector(
+                ".horaFin"
+            ).value;
+
+
+        if (
+            activo &&
+            (
+                horaInicio === "" ||
+                horaFin === ""
+            )
+        ) {
+
+            mensaje.innerText =
+                "⚠️ Completa las horas de los días abiertos.";
+
+            return;
+
+        }
+
+
+        if (
+            activo &&
+            horaInicio >= horaFin
+        ) {
+
+            mensaje.innerText =
+                "⚠️ La hora de inicio debe ser anterior a la hora de cierre.";
+
+            return;
+
+        }
+
+
+        if (id) {
+
+            const {
+                error
+            } =
+                await supabaseClient
+
+                    .from("horarios")
+
+                    .update({
+
+                        hora_inicio:
+                            horaInicio,
+
+                        hora_fin:
+                            horaFin,
+
+                        activo:
+                            activo
+
+                    })
+
+                    .eq(
+                        "id",
+                        id
+                    )
+
+                    .eq(
+                        "negocio_id",
+                        negocioId
+                    );
+
+
+            if (error) {
+
+                console.error(
+                    "Error actualizando horario:",
+                    error
+                );
+
+                mensaje.innerText =
+                    "❌ Error guardando horarios.";
+
+                return;
+
+            }
+
+        } else {
+
+            const {
+                error
+            } =
+                await supabaseClient
+
+                    .from("horarios")
+
+                    .insert({
+
+                        dia_semana:
+                            dia,
+
+                        hora_inicio:
+                            horaInicio,
+
+                        hora_fin:
+                            horaFin,
+
+                        activo:
+                            activo,
+
+                        negocio_id:
+                            negocioId
+
+                    });
+
+
+            if (error) {
+
+                console.error(
+                    "Error creando horario:",
+                    error
+                );
+
+                mensaje.innerText =
+                    "❌ Error creando horario.";
+
+                return;
+
+            }
+
+        }
+
+    }
+
+
+    mensaje.innerText =
+        "✅ Horarios guardados correctamente.";
+
+    await cargarHorarios();
+
+}
+
+
+
+// ==================================================
+// FECHA LOCAL
+// ==================================================
+
+function obtenerFechaLocal() {
+
+    const ahora =
+        new Date();
+
+    const año =
+        ahora.getFullYear();
+
+    const mes =
+        String(
+            ahora.getMonth() + 1
+        ).padStart(2, "0");
+
+    const dia =
+        String(
+            ahora.getDate()
+        ).padStart(2, "0");
+
+    return (
+        año +
+        "-" +
+        mes +
+        "-" +
+        dia
+    );
+
+}
+
+
+
+// ==================================================
+// FECHA MAÑANA
+// ==================================================
+
+function obtenerFechaManana() {
+
+    const ahora =
+        new Date();
+
+    ahora.setDate(
+        ahora.getDate() + 1
+    );
+
+    const año =
+        ahora.getFullYear();
+
+    const mes =
+        String(
+            ahora.getMonth() + 1
+        ).padStart(2, "0"
+        );
+
+    const dia =
+        String(
+            ahora.getDate()
+        ).padStart(2, "0");
+
+    return (
+        año +
+        "-" +
+        mes +
+        "-" +
+        dia
+    );
 
 }
 
@@ -734,18 +1310,10 @@ async function cargarNegocio() {
 
 async function cargarCitas() {
 
-
     const lista =
         document.getElementById(
             "listaCitas"
         );
-
-
-    const contador =
-        document.getElementById(
-            "numeroCitas"
-        );
-
 
     lista.innerHTML = `
 
@@ -754,7 +1322,6 @@ async function cargarCitas() {
         </div>
 
     `;
-
 
     const {
         data,
@@ -782,14 +1349,12 @@ async function cargarCitas() {
                 }
             );
 
-
     if (error) {
 
         console.error(
             "Error cargando citas:",
             error
         );
-
 
         lista.innerHTML = `
 
@@ -805,19 +1370,175 @@ async function cargarCitas() {
 
         `;
 
+        document.getElementById(
+            "numeroCitas"
+        ).innerText = "0";
 
-        contador.innerText = "0";
+        document.getElementById(
+            "citasHoy"
+        ).innerText = "0";
 
         return;
 
     }
 
+    todasLasCitas =
+        data || [];
 
-    contador.innerText =
-        data.length;
+    document.getElementById(
+        "numeroCitas"
+    ).innerText =
+        todasLasCitas.length;
+
+    const hoy =
+        obtenerFechaLocal();
+
+    const totalHoy =
+        todasLasCitas.filter(
+            function(cita) {
+
+                return cita.fecha === hoy;
+
+            }
+        ).length;
+
+    document.getElementById(
+        "citasHoy"
+    ).innerText =
+        totalHoy;
+
+    mostrarCitas();
+
+}
 
 
-    if (data.length === 0) {
+
+// ==================================================
+// CAMBIAR FILTRO
+// ==================================================
+
+function cambiarFiltro(
+    filtro
+) {
+
+    filtroActual =
+        filtro;
+
+    document
+        .querySelectorAll(
+            ".filtros button"
+        )
+        .forEach(
+            function(boton) {
+
+                boton.classList.remove(
+                    "activo"
+                );
+
+            }
+        );
+
+    if (
+        filtro === "hoy"
+    ) {
+
+        document
+            .getElementById(
+                "filtroHoy"
+            )
+            .classList.add(
+                "activo"
+            );
+
+    }
+
+    if (
+        filtro === "manana"
+    ) {
+
+        document
+            .getElementById(
+                "filtroManana"
+            )
+            .classList.add(
+                "activo"
+            );
+
+    }
+
+    if (
+        filtro === "todas"
+    ) {
+
+        document
+            .getElementById(
+                "filtroTodas"
+            )
+            .classList.add(
+                "activo"
+            );
+
+    }
+
+    mostrarCitas();
+
+}
+
+
+
+// ==================================================
+// MOSTRAR CITAS
+// ==================================================
+
+function mostrarCitas() {
+
+    const lista =
+        document.getElementById(
+            "listaCitas"
+        );
+
+    let citasFiltradas =
+        todasLasCitas;
+
+    const hoy =
+        obtenerFechaLocal();
+
+    const manana =
+        obtenerFechaManana();
+
+    if (
+        filtroActual === "hoy"
+    ) {
+
+        citasFiltradas =
+            todasLasCitas.filter(
+                function(cita) {
+
+                    return cita.fecha === hoy;
+
+                }
+            );
+
+    }
+
+    if (
+        filtroActual === "manana"
+    ) {
+
+        citasFiltradas =
+            todasLasCitas.filter(
+                function(cita) {
+
+                    return cita.fecha === manana;
+
+                }
+            );
+
+    }
+
+    if (
+        citasFiltradas.length === 0
+    ) {
 
         lista.innerHTML = `
 
@@ -828,8 +1549,7 @@ async function cargarCitas() {
                 </h2>
 
                 <p>
-                    Cuando un cliente reserve,
-                    aparecerá aquí.
+                    No hay reservas para este periodo.
                 </p>
 
             </div>
@@ -840,46 +1560,51 @@ async function cargarCitas() {
 
     }
 
-
     lista.innerHTML = "";
 
-
-    data.forEach(
+    citasFiltradas.forEach(
         function(cita) {
-
 
             lista.innerHTML += `
 
                 <div class="cita">
 
-                    <div class="hora">
-                        ${cita.hora}
-                    </div>
+                    <div class="cabeceraCita">
 
+                        <div class="hora">
+                            ${cita.hora}
+                        </div>
+
+                        <div class="fecha">
+                            📅 ${cita.fecha}
+                        </div>
+
+                    </div>
 
                     <h2>
                         ${cita.nombre}
                     </h2>
 
-
-                    <p>
-                        📅 ${cita.fecha}
-                    </p>
-
-
                     <p>
                         ✂️ ${cita.servicio}
                     </p>
-
 
                     <p>
                         📞 ${cita.telefono}
                     </p>
 
-
                     <span class="estado">
                         Reserva confirmada
                     </span>
+
+                    <br>
+
+                    <button
+                        class="botonCancelar"
+                        onclick="cancelarCita('${cita.id}')"
+                    >
+                        ❌ Cancelar cita
+                    </button>
 
                 </div>
 
@@ -893,56 +1618,112 @@ async function cargarCitas() {
 
 
 // ==================================================
-// CERRAR SESIÓN
+// CANCELAR CITA
 // ==================================================
 
-async function cerrarSesion() {
+async function cancelarCita(
+    id
+) {
 
+    const confirmar =
+        confirm(
+            "¿Seguro que quieres cancelar esta cita?"
+        );
 
-    await supabaseClient.auth.signOut();
+    if (!confirmar) {
+        return;
+    }
 
+    const {
+        error
+    } =
+        await supabaseClient
 
-    document.getElementById(
-        "panel"
-    ).style.display = "none";
+            .from("citas")
 
+            .delete()
 
-    document.getElementById(
-        "login"
-    ).style.display = "block";
+            .eq(
+                "id",
+                id
+            );
 
+    if (error) {
 
-    document.getElementById(
-        "password"
-    ).value = "";
+        console.error(
+            "Error cancelando cita:",
+            error
+        );
 
+        alert(
+            "❌ No se pudo cancelar la cita."
+        );
 
-    document.getElementById(
-        "mensajeLogin"
-    ).innerText = "";
+        return;
+
+    }
+
+    alert(
+        "✅ Cita cancelada correctamente."
+    );
+
+    await cargarCitas();
 
 }
 
 
 
 // ==================================================
-// COMPROBAR SI YA HAY SESIÓN
+// CERRAR SESIÓN
+// ==================================================
+
+async function cerrarSesion() {
+
+    await supabaseClient.auth.signOut();
+
+    document.getElementById(
+        "panel"
+    ).style.display = "none";
+
+    document.getElementById(
+        "login"
+    ).style.display = "block";
+
+    document.getElementById(
+        "password"
+    ).value = "";
+
+    document.getElementById(
+        "mensajeLogin"
+    ).innerText = "";
+
+    negocioId = null;
+
+    todasLasCitas = [];
+
+    filtroActual = "todas";
+
+}
+
+
+
+// ==================================================
+// COMPROBAR SESIÓN
 // ==================================================
 
 async function comprobarSesion() {
-
 
     const {
         data: {
             session
         }
     } =
-        await supabaseClient.auth.getSession();
-
+        await supabaseClient.auth
+            .getSession();
 
     if (session) {
 
-        mostrarPanel(
+        await mostrarPanel(
             session.user
         );
 
@@ -951,7 +1732,6 @@ async function comprobarSesion() {
         document.getElementById(
             "login"
         ).style.display = "block";
-
 
         document.getElementById(
             "panel"
@@ -971,7 +1751,6 @@ comprobarSesion();
 
 
 </script>
-
 
 </body>
 
