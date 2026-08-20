@@ -140,7 +140,25 @@ html
             background-color: #eee;
             color: #111;
         }
+<!-- ==================================================
+     CALENDARIO
+================================================== -->
 
+<div class="seccion">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+
+        <button onclick="mesAnterior()">◀</button>
+
+        <h2 id="tituloCalendario">Calendario</h2>
+
+        <button onclick="mesSiguiente()">▶</button>
+
+    </div>
+
+    <div id="calendario"></div>
+
+</div>
         /* =========================
            RESUMEN
         ========================= */
@@ -353,7 +371,62 @@ html
             background-color: white;
             border-radius: 15px;
         }
+/* =========================
+   CALENDARIO
+========================= */
 
+#calendario{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:8px;
+}
+
+.diaSemana{
+    text-align:center;
+    font-weight:bold;
+    color:#666;
+    padding:8px;
+}
+
+.dia{
+    background:white;
+    border:1px solid #ddd;
+    border-radius:12px;
+    padding:12px 5px;
+    min-height:70px;
+    cursor:pointer;
+    position:relative;
+}
+
+.dia:hover{
+    border-color:#111;
+}
+
+.dia.vacio{
+    background:transparent;
+    border:none;
+    cursor:default;
+}
+
+.dia.hoy{
+    background:#DCFCE7;
+    border:2px solid #16A34A;
+}
+
+.dia.seleccionado{
+    border:2px solid black;
+}
+
+.punto{
+    width:8px;
+    height:8px;
+    background:#16A34A;
+    border-radius:50%;
+    position:absolute;
+    bottom:8px;
+    left:50%;
+    transform:translateX(-50%);
+}
         @media (max-width: 600px) {
 
             .resumen-grid {
@@ -458,7 +531,25 @@ html
 
     </header>
 
+<!-- ==================================================
+     CALENDARIO
+================================================== -->
 
+<div class="seccion">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+
+        <button onclick="mesAnterior()">◀</button>
+
+        <h2 id="tituloCalendario">Calendario</h2>
+
+        <button onclick="mesSiguiente()">▶</button>
+
+    </div>
+
+    <div id="calendario"></div>
+
+</div>
 
     <!-- ==================================================
          RESUMEN
@@ -589,7 +680,6 @@ html
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-
 <script>
 
 
@@ -617,6 +707,21 @@ let negocioId = null;
 let todasLasCitas = [];
 
 let filtroActual = "todas";
+// ================================
+// CALENDARIO
+// ================================
+
+let fechaSeleccionada = obtenerFechaLocal();
+
+const fechaActual = new Date();
+
+let mesActual = fechaActual.getMonth();
+let añoActual = fechaActual.getFullYear();
+
+const meses = [
+    "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+    "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"
+];
 
 
 
@@ -1407,10 +1512,10 @@ async function cargarCitas() {
     ).innerText =
         totalHoy;
 
-    mostrarCitas();
+    pintarCalendario();
+mostrarCitas();
 
 }
-
 
 
 // ==================================================
@@ -1535,6 +1640,11 @@ function mostrarCitas() {
             );
 
     }
+    if (filtroActual === "fecha") {
+    citasFiltradas = todasLasCitas.filter(function(cita) {
+        return cita.fecha === fechaSeleccionada;
+    });
+}
 
     if (
         citasFiltradas.length === 0
@@ -1741,7 +1851,81 @@ async function comprobarSesion() {
 
 }
 
+// ==================================================
+// CALENDARIO
+// ==================================================
 
+function pintarCalendario(){
+
+    const calendario = document.getElementById("calendario");
+    if(!calendario) return;
+
+    calendario.innerHTML="";
+
+    document.getElementById("tituloCalendario").innerText =
+        meses[mesActual] + " " + añoActual;
+
+    ["L","M","X","J","V","S","D"].forEach(d=>{
+        calendario.innerHTML += `<div class="diaSemana">${d}</div>`;
+    });
+
+    const primerDia = new Date(añoActual, mesActual, 1);
+
+    let inicio = primerDia.getDay();
+    if(inicio===0) inicio=7;
+
+    for(let i=1;i<inicio;i++){
+        calendario.innerHTML += `<div class="dia vacio"></div>`;
+    }
+
+    const diasMes = new Date(añoActual, mesActual+1, 0).getDate();
+
+    for(let dia=1; dia<=diasMes; dia++){
+
+        const fecha =
+            `${añoActual}-${String(mesActual+1).padStart(2,"0")}-${String(dia).padStart(2,"0")}`;
+
+        const hayReserva =
+            todasLasCitas.some(c=>c.fecha===fecha);
+
+        let clases="dia";
+
+        if(fecha===obtenerFechaLocal()) clases+=" hoy";
+        if(fecha===fechaSeleccionada) clases+=" seleccionado";
+
+        calendario.innerHTML += `
+            <div class="${clases}" onclick="seleccionarFecha('${fecha}')">
+                <div>${dia}</div>
+                ${hayReserva ? '<div class="punto"></div>' : ''}
+            </div>
+        `;
+    }
+}
+
+function seleccionarFecha(fecha){
+    fechaSeleccionada = fecha;
+    filtroActual = "fecha";
+    pintarCalendario();
+    mostrarCitas();
+}
+
+function mesAnterior(){
+    mesActual--;
+    if(mesActual<0){
+        mesActual=11;
+        añoActual--;
+    }
+    pintarCalendario();
+}
+
+function mesSiguiente(){
+    mesActual++;
+    if(mesActual>11){
+        mesActual=0;
+        añoActual++;
+    }
+    pintarCalendario();
+}
 
 // ==================================================
 // INICIAR
