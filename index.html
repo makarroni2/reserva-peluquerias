@@ -171,42 +171,39 @@
         }
 
         async function cargarServicios() {
+            const selector = document.getElementById("servicio");
+            selector.innerHTML = `<option value="">Cargando servicios...</option>`;
 
-    const selector = document.getElementById("servicio");
+            const idNegocio = await obtenerNegocioId();
 
-    selector.innerHTML = `<option value="">Cargando servicios...</option>`;
+            if (!idNegocio) {
+                selector.innerHTML = `<option value="">No hay servicios disponibles</option>`;
+                return;
+            }
 
-    const idNegocio = await obtenerNegocioId();
+            const { data: servicios, error } = await supabaseClient
+                .from("servicios")
+                .select("nombre, precio, duracion")
+                .eq("negocio_id", idNegocio)
+                .eq("activo", true)
+                .order("precio");
 
-    if (!idNegocio) {
-        selector.innerHTML = `<option value="">No hay servicios disponibles</option>`;
-        return;
-    }
+            if (error) {
+                console.error(error);
+                selector.innerHTML = `<option value="">Error cargando servicios</option>`;
+                return;
+            }
 
-    const { data: servicios, error } = await supabaseClient
-        .from("servicios")
-        .select("nombre, precio, duracion")
-        .eq("negocio_id", idNegocio)
-        .eq("activo", true)
-        .order("precio");
+            selector.innerHTML = `<option value="">Selecciona un servicio</option>`;
 
-    if (error) {
-        console.error(error);
-        selector.innerHTML = `<option value="">Error cargando servicios</option>`;
-        return;
-    }
-
-    selector.innerHTML = `<option value="">Selecciona un servicio</option>`;
-
-    servicios.forEach((servicio) => {
-        selector.innerHTML += `
-            <option value="${servicio.nombre}">
-                ${servicio.nombre} (${servicio.duracion} min) - ${Number(servicio.precio).toFixed(2)} €
-            </option>
-        `;
-    });
-
-}
+            servicios.forEach((servicio) => {
+                selector.innerHTML += `
+                    <option value="${servicio.nombre}">
+                        ${servicio.nombre} (${servicio.duracion} min) - ${Number(servicio.precio).toFixed(2)} €
+                    </option>
+                `;
+            });
+        }
 
         async function cargarDiasCerrados() {
             const idNegocio = await obtenerNegocioId();
@@ -240,140 +237,7 @@
         const campoFecha = document.getElementById("fecha");
         campoFecha.min = obtenerFechaHoy();
         campoFecha.addEventListener("change", cargarHoras);
-
-        async function cargarHoras() {
-
-    const fecha = document.getElementById("fecha").value;
-    const selectorHora = document.getElementById("hora");
-    const estadoHora = document.getElementById("estadoHora");
-
-    selectorHora.innerHTML = `<option value="">Selecciona una hora</option>`;
-
-    if (!fecha) {
-        estadoHora.innerText = "";
-        return;
-    }
-
-    // No permitir fechas pasadas
-    const fechaHoy = obtenerFechaHoy();
-
-    if (fecha < fechaHoy) {
-        estadoHora.innerText = "❌ No se pueden reservar citas en fechas pasadas.";
-        document.getElementById("fecha").value = "";
-        return;
-    }
-
-    // Día cerrado
-    if (diasCerrados.includes(fecha)) {
-        estadoHora.innerText = "🏖️ La peluquería está cerrada este día.";
-        selectorHora.innerHTML = `<option value="">No disponible</option>`;
-        return;
-    }
-
-    estadoHora.innerText = "Comprobando horario...";
-
-    // Día de la semana
-    const fechaSeleccionada = new Date(fecha + "T00:00:00");
-    const diaJavaScript = fechaSeleccionada.getDay();
-    const diaSemana = diaJavaScript === 0 ? 7 : diaJavaScript;
-
-    const idNegocio = await obtenerNegocioId();
-
-    // Horario del negocio
-    const { data: horarios, error: errorHorarios } = await supabaseClient
-        .from("horarios")
-        .select("dia_semana, hora_inicio, hora_fin, activo")
-        .eq("negocio_id", idNegocio)
-        .eq("dia_semana", diaSemana)
-        .eq("activo", true);
-
-    if (errorHorarios) {
-        console.error(errorHorarios);
-        estadoHora.innerText = "❌ No se pudo comprobar el horario.";
-        return;
-    }
-
-    if (!horarios || horarios.length === 0) {
-        estadoHora.innerText = "🔴 La peluquería está cerrada este día.";
-        return;
-    }
-
-    // Citas del día
-    const { data: citas, error: errorCitas } = await supabaseClient
-        .from("citas")
-        .select("hora, servicio")
-        .eq("fecha", fecha)
-        .eq("negocio_id", idNegocio);
-
-    if (errorCitas) {
-        console.error(errorCitas);
-        estadoHora.innerText = "❌ No se pudo comprobar la disponibilidad.";
-        return;
-    }
-
-    // Duración de servicios
-    const { data: servicios } = await supabaseClient
-        .from("servicios")
-        .select("nombre, duracion")
-        .eq("negocio_id", idNegocio);
-
-    const mapaDuraciones = {};
-
-    (servicios || []).forEach((servicio) => {
-        mapaDuraciones[servicio.nombre] = servicio.duracion;
-    });
-
-    // Horas ocupadas según duración
-    const horasOcupadas = [];
-
-    (citas || []).forEach((cita) => {
-
-        const duracion = mapaDuraciones[cita.servicio] || 30;
-
-        let [hora, minutos] = cita.hora.substring(0, 5).split(":").map(Number);
-
-        for (let i = 0; i < duracion; i += 30) {
-
-            horasOcupadas.push(
-                String(hora).padStart(2, "0") + ":" +
-                String(minutos).padStart(2, "0")
-            );
-
-            minutos += 30;
-
-            if (minutos >= 60) {
-                hora++;
-                minutos -= 60;
-            }
-        }
-    });
-
-    // Horas disponibles del horario
-    const horas = generarHorasDesdeHorarios(horarios);
-
-    horas.forEach((hora) => {
-
-        const option = document.createElement("option");
-        option.value = hora;
-
-        if (horasOcupadas.includes(hora)) {
-            option.textContent = hora + " — Ocupada";
-            option.disabled = true;
-        } else {
-            option.textContent = hora + " — Disponible";
-        }
-
-        selectorHora.appendChild(option);
-    });
-
-    const horasLibres = horas.filter((hora) => !horasOcupadas.includes(hora));
-
-    if (horasLibres.length === 0) {
-        estadoHora.innerText = "❌ No quedan horas disponibles.";
-    } else {
-        estadoHora.innerText = "✅ Selecciona una hora disponible.";
-    }
-}
+        document.getElementById("servicio").addEventListener("change", cargarHoras);
 
         function normalizarHora(hora) {
             if (!hora) return "";
@@ -382,159 +246,200 @@
 
         function generarHorasDesdeHorarios(horarios) {
             const horas = [];
+            horarios.forEach(h => {
+                let [hInicio, mInicio] = normalizarHora(h.hora_inicio).split(":").map(Number);
+                let [hFin, mFin] = normalizarHora(h.hora_fin).split(":").map(Number);
 
-            horarios.forEach(horario => {
-                const inicio = normalizarHora(horario.hora_inicio);
-                const fin = normalizarHora(horario.hora_fin);
+                let minutosActuales = hInicio * 60 + mInicio;
+                let minutosFin = hFin * 60 + mFin;
 
-                let [hora, minutos] = inicio.split(":").map(Number);
-                const [horaFin, minutosFin] = fin.split(":").map(Number);
+                while (minutosActuales < minutosFin) {
+                    let hh = Math.floor(minutosActuales / 60);
+                    let mm = minutosActuales % 60;
+                    horas.push(
+                        String(hh).padStart(2, "0") + ":" + String(mm).padStart(2, "0")
+                    );
+                    minutosActuales += 30; // Intervalos de 30 min
+                }
+            });
+            return horas;
+        }
 
-                while (hora < horaFin || (hora === horaFin && minutos < minutosFin)) {
-                    const horaTexto = String(hora).padStart(2, "0") + ":" + String(minutos).padStart(2, "0");
+        async function cargarHoras() {
+            const fecha = document.getElementById("fecha").value;
+            const selectorHora = document.getElementById("hora");
+            const estadoHora = document.getElementById("estadoHora");
+            const servicioSeleccionado = document.getElementById("servicio").value;
 
-                    if (!horas.includes(horaTexto)) {
-                        horas.push(horaTexto);
-                    }
+            selectorHora.innerHTML = `<option value="">Selecciona una hora</option>`;
 
-                    minutos += 30;
+            if (!fecha || !servicioSeleccionado) {
+                estadoHora.innerText = "Selecciona primero un servicio y una fecha.";
+                return;
+            }
 
-                    if (minutos >= 60) {
-                        hora += Math.floor(minutos / 60);
-                        minutos = minutos % 60;
+            if (diasCerrados.includes(fecha)) {
+                estadoHora.innerText = "🏖️ La peluquería está cerrada este día.";
+                return;
+            }
+
+            const idNegocio = await obtenerNegocioId();
+
+            // Obtener duración del servicio elegido
+            const { data: servicio } = await supabaseClient
+                .from("servicios")
+                .select("duracion")
+                .eq("negocio_id", idNegocio)
+                .eq("nombre", servicioSeleccionado)
+                .single();
+
+            const duracion = servicio?.duracion || 30;
+
+            // Día de la semana
+            const fechaObj = new Date(fecha + "T00:00:00");
+            const diaSemana = fechaObj.getDay() === 0 ? 7 : fechaObj.getDay();
+
+            // Horario del negocio
+            const { data: horarios } = await supabaseClient
+                .from("horarios")
+                .select("*")
+                .eq("negocio_id", idNegocio)
+                .eq("dia_semana", diaSemana)
+                .eq("activo", true);
+
+            if (!horarios || horarios.length === 0) {
+                estadoHora.innerText = "🔴 La peluquería está cerrada ese día.";
+                return;
+            }
+
+            // Citas existentes
+            const { data: citas } = await supabaseClient
+                .from("citas")
+                .select("hora, servicio")
+                .eq("negocio_id", idNegocio)
+                .eq("fecha", fecha);
+
+            // Servicios (para conocer duración de cada cita)
+            const { data: servicios } = await supabaseClient
+                .from("servicios")
+                .select("nombre, duracion")
+                .eq("negocio_id", idNegocio);
+
+            const mapaDuraciones = {};
+            (servicios || []).forEach(s => mapaDuraciones[s.nombre] = s.duracion);
+
+            // Horas bloqueadas
+            const horasOcupadas = [];
+
+            (citas || []).forEach(cita => {
+                const dur = mapaDuraciones[cita.servicio] || 30;
+                let [h, m] = cita.hora.substring(0, 5).split(":").map(Number);
+
+                for (let i = 0; i < dur; i += 30) {
+                    horasOcupadas.push(
+                        String(h).padStart(2, "0") + ":" +
+                        String(m).padStart(2, "0")
+                    );
+
+                    m += 30;
+                    if (m >= 60) {
+                        h++;
+                        m -= 60;
                     }
                 }
             });
 
-            horas.sort();
-            return horas;
+            const horas = generarHorasDesdeHorarios(horarios);
+
+            if (horas.length === 0) {
+                estadoHora.innerText = "❌ No hay horarios configurados para este día.";
+                return;
+            }
+
+            horas.forEach(hora => {
+                let libre = true;
+                let [h, m] = hora.split(":").map(Number);
+
+                for (let i = 0; i < duracion; i += 30) {
+                    const bloque =
+                        String(h).padStart(2, "0") + ":" +
+                        String(m).padStart(2, "0");
+
+                    if (horasOcupadas.includes(bloque)) {
+                        libre = false;
+                    }
+
+                    m += 30;
+                    if (m >= 60) {
+                        h++;
+                        m -= 60;
+                    }
+                }
+
+                const option = document.createElement("option");
+                option.value = hora;
+
+                if (libre) {
+                    option.textContent = hora + " — Disponible";
+                } else {
+                    option.textContent = hora + " — Ocupada";
+                    option.disabled = true;
+                }
+
+                selectorHora.appendChild(option);
+            });
+
+            estadoHora.innerText = "✅ Selecciona una hora disponible.";
         }
 
         async function confirmarCita() {
+            const servicio = document.getElementById("servicio").value;
+            const fecha = document.getElementById("fecha").value;
+            const hora = document.getElementById("hora").value;
+            const nombre = document.getElementById("nombre").value.trim();
+            const telefono = document.getElementById("telefono").value.trim();
+            const mensaje = document.getElementById("mensaje");
 
-    const servicio = document.getElementById("servicio").value;
-    const fecha = document.getElementById("fecha").value;
-    const hora = document.getElementById("hora").value;
-    const nombre = document.getElementById("nombre").value.trim();
-    const telefono = document.getElementById("telefono").value.trim();
-    const mensaje = document.getElementById("mensaje");
-
-    // Campos obligatorios
-    if (!servicio || !fecha || !hora || !nombre || !telefono) {
-        mensaje.innerText = "⚠️ Completa todos los campos.";
-        return;
-    }
-
-    // Fecha pasada
-    if (fecha < obtenerFechaHoy()) {
-        mensaje.innerText = "❌ No se pueden reservar citas en fechas pasadas.";
-        return;
-    }
-
-    mensaje.innerText = "Guardando cita...";
-
-    const idNegocio = await obtenerNegocioId();
-
-    // Obtener servicios (duración)
-    const { data: servicios } = await supabaseClient
-        .from("servicios")
-        .select("nombre, duracion")
-        .eq("negocio_id", idNegocio);
-
-    const mapaDuraciones = {};
-    (servicios || []).forEach((s) => {
-        mapaDuraciones[s.nombre] = s.duracion;
-    });
-
-    const duracionNueva = mapaDuraciones[servicio] || 30;
-
-    // Comprobar solapes
-    const { data: citasExistentes } = await supabaseClient
-        .from("citas")
-        .select("hora, servicio")
-        .eq("fecha", fecha)
-        .eq("negocio_id", idNegocio);
-
-    const nuevaHoraInicio =
-        Number(hora.substring(0, 2)) * 60 +
-        Number(hora.substring(3, 5));
-
-    const nuevaHoraFin = nuevaHoraInicio + duracionNueva;
-
-    let haySolape = false;
-
-    (citasExistentes || []).forEach((cita) => {
-
-        const inicio =
-            Number(cita.hora.substring(0, 2)) * 60 +
-            Number(cita.hora.substring(3, 5));
-
-        const fin = inicio + (mapaDuraciones[cita.servicio] || 30);
-
-        if (nuevaHoraInicio < fin && nuevaHoraFin > inicio) {
-            haySolape = true;
-        }
-
-    });
-
-    if (haySolape) {
-        mensaje.innerText = "❌ Ese horario se solapa con otra cita.";
-        cargarHoras();
-        return;
-    }
-
-    // Guardar cliente
-    await supabaseClient
-        .from("clientes")
-        .upsert(
-            {
-                negocio_id: idNegocio,
-                nombre,
-                telefono
-            },
-            {
-                onConflict: "negocio_id,telefono"
+            if (!servicio || !fecha || !hora || !nombre || !telefono) {
+                mensaje.style.color = "red";
+                mensaje.innerText = "Por favor, completa todos los campos.";
+                return;
             }
-        );
 
-    // Guardar cita
-    const { error } = await supabaseClient
-        .from("citas")
-        .insert({
-            negocio_id: idNegocio,
-            nombre,
-            telefono,
-            servicio,
-            fecha,
-            hora
-        });
+            const idNegocio = await obtenerNegocioId();
 
-    if (error) {
+            const { error } = await supabaseClient
+                .from("citas")
+                .insert([
+                    {
+                        negocio_id: idNegocio,
+                        servicio: servicio,
+                        fecha: fecha,
+                        hora: hora,
+                        nombre: nombre,
+                        telefono: telefono
+                    }
+                ]);
 
-        if (error.code === "23505") {
-            mensaje.innerText = "❌ Esa hora ya está ocupada. Elige otra.";
-            cargarHoras();
-            return;
+            if (error) {
+                console.error("Error al guardar la cita:", error);
+                mensaje.style.color = "red";
+                mensaje.innerText = "Hubo un error al reservar. Inténtalo de nuevo.";
+                return;
+            }
+
+            mensaje.style.color = "green";
+            mensaje.innerText = "¡Cita reservada con éxito!";
+            
+            // Recargar horas disponibles y limpiar campos básicos
+            setTimeout(() => {
+                document.getElementById("nombre").value = "";
+                document.getElementById("telefono").value = "";
+                cargarHoras();
+            }, 1500);
         }
 
-        console.error(error);
-        mensaje.innerText = "❌ No se pudo guardar la cita.";
-        return;
-    }
-
-    mensaje.innerText = "✅ ¡Cita reservada correctamente!";
-
-    // Limpiar formulario
-    document.getElementById("servicio").value = "";
-    document.getElementById("fecha").value = "";
-    document.getElementById("hora").innerHTML =
-        `<option value="">Selecciona una hora</option>`;
-    document.getElementById("nombre").value = "";
-    document.getElementById("telefono").value = "";
-    document.getElementById("estadoHora").innerText = "";
-
-}
-
+        // Inicializar datos al cargar la página
         cargarServicios();
         cargarDiasCerrados();
     </script>

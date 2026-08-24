@@ -612,7 +612,9 @@
                 <label>Fecha</label>
                 <input type="date" id="editarFecha">
                 <label>Hora</label>
-                <input type="time" id="editarHora">
+                <select id="editarHora">
+                    <option value="">Selecciona una hora</option>
+                </select>
                 <div class="accionesEditar">
                     <button onclick="guardarEdicionCita()">💾 Guardar cambios</button>
                     <button class="cerrar" onclick="cerrarEditarCita()">Cancelar</button>
@@ -678,7 +680,9 @@
             <div class="servicio-grid">
                 <select id="nuevoServicio"></select>
                 <input type="date" id="nuevaFecha">
-                <input type="time" id="nuevaHora">
+                <select id="nuevaHora">
+                    <option value="">Selecciona una hora</option>
+                </select>
             </div>
             <br>
             <button class="botonGuardarHorarios" onclick="crearCitaManual()">💾 Guardar cita</button>
@@ -748,6 +752,7 @@
         let todasLasCitas = [];
         let filtroActual = "todas";
         let todosLosServicios = [];
+        let diasCerrados = [];
 
         let fechaSeleccionada = "";
         const fechaActual = new Date();
@@ -914,7 +919,6 @@
         }
 
         async function cargarServicios() {
-            const contenedor = document.getElementById("listaServicios");
             const { data } = await supabaseClient.from("servicios").select("*").eq("negocio_id", negocioId).order("id");
             todosLosServicios = data || [];
             pintarServicios();
@@ -990,136 +994,336 @@
                     selector.innerHTML += `<option value="${s.nombre}">${s.nombre} - ${Number(s.precio).toFixed(2)} €</option>`;
                 });
             }
-        }
 
-        async function crearCitaManual() {
-
-    const mensaje = document.getElementById("mensajeNuevaCita");
-
-    const nombre = document.getElementById("nuevaNombre").value.trim();
-    const telefono = document.getElementById("nuevoTelefono").value.trim();
-    const servicio = document.getElementById("nuevoServicio").value;
-    const fecha = document.getElementById("nuevaFecha").value;
-    const hora = document.getElementById("nuevaHora").value;
-
-    if (!nombre || !telefono || !servicio || !fecha || !hora) {
-        mensaje.innerText = "⚠️ Completa todos los campos.";
-        return;
-    }
-
-    if (fecha < obtenerFechaLocal()) {
-        mensaje.innerText = "⚠️ No puedes crear citas en días pasados.";
-        return;
-    }
-
-    mensaje.innerText = "Guardando cita...";
-
-    // Obtener duración de servicios
-    const { data: servicios } = await supabaseClient
-        .from("servicios")
-        .select("nombre, duracion")
-        .eq("negocio_id", negocioId);
-
-    const mapaDuraciones = {};
-
-    (servicios || []).forEach((s) => {
-        mapaDuraciones[s.nombre] = s.duracion;
-    });
-
-    const duracionNueva = mapaDuraciones[servicio] || 30;
-
-    // Comprobar solapes
-    const { data: citasExistentes } = await supabaseClient
-        .from("citas")
-        .select("hora, servicio")
-        .eq("fecha", fecha)
-        .eq("negocio_id", negocioId);
-
-    const nuevaHoraInicio =
-        Number(hora.substring(0,2)) * 60 +
-        Number(hora.substring(3,5));
-
-    const nuevaHoraFin =
-        nuevaHoraInicio + duracionNueva;
-
-    let haySolape = false;
-
-    (citasExistentes || []).forEach((cita) => {
-
-        const inicio =
-            Number(cita.hora.substring(0,2)) * 60 +
-            Number(cita.hora.substring(3,5));
-
-        const fin =
-            inicio + (mapaDuraciones[cita.servicio] || 30);
-
-        if (
-            nuevaHoraInicio < fin &&
-            nuevaHoraFin > inicio
-        ) {
-            haySolape = true;
-        }
-
-    });
-
-    if (haySolape) {
-        mensaje.innerText = "❌ Ese horario ya está ocupado.";
-        return;
-    }
-
-    // Guardar cliente
-    await supabaseClient
-        .from("clientes")
-        .upsert(
-            {
-                negocio_id: negocioId,
-                nombre,
-                telefono
-            },
-            {
-                onConflict: "negocio_id,telefono"
+            const selectorEditar = document.getElementById("editarServicio");
+            selectorEditar.innerHTML = `<option value="">Selecciona un servicio</option>`;
+            if (data) {
+                data.forEach(s => {
+                    selectorEditar.innerHTML += `<option value="${s.nombre}">${s.nombre} - ${Number(s.precio).toFixed(2)} €</option>`;
+                });
             }
-        );
+        }
 
-    // Guardar cita
-    const { error } = await supabaseClient
-        .from("citas")
-        .insert({
-            negocio_id: negocioId,
-            nombre,
-            telefono,
-            servicio,
-            fecha,
-            hora
+        function normalizarHora(hora) {
+            if (!hora) return "";
+            return hora.substring(0, 5);
+        }
+
+        function generarHorasDesdeHorarios(horarios) {
+            const horas = [];
+            horarios.forEach(h => {
+                let [hInicio, mInicio] = normalizarHora(h.hora_inicio).split(":").map(Number);
+                let [hFin, mFin] = normalizarHora(h.hora_fin).split(":").map(Number);
+
+                let minutosActuales = hInicio * 60 + mInicio;
+                let minutosFin = hFin * 60 + mFin;
+
+                while (minutosActuales < minutosFin) {
+                    let hh = Math.floor(minutosActuales / 60);
+                    let mm = minutosActuales % 60;
+                    horas.push(
+                        String(hh).padStart(2, "0") + ":" + String(mm).padStart(2, "0")
+                    );
+                    minutosActuales += 30;
+                }
+            });
+            return horas;
+        }
+
+        async function cargarHorasNuevaCita() {
+            const servicio = document.getElementById("nuevoServicio").value;
+            const fecha = document.getElementById("nuevaFecha").value;
+            const selector = document.getElementById("nuevaHora");
+
+            selector.innerHTML = `<option value="">Selecciona una hora</option>`;
+
+            if (!servicio || !fecha) return;
+
+            if (diasCerrados.includes(fecha)) return;
+
+            // Duración del servicio
+            const { data: servicioInfo } = await supabaseClient
+                .from("servicios")
+                .select("duracion")
+                .eq("negocio_id", negocioId)
+                .eq("nombre", servicio)
+                .single();
+
+            const duracion = servicioInfo?.duracion || 30;
+
+            // Día de la semana
+            const fechaObj = new Date(fecha + "T00:00:00");
+            const diaSemana = fechaObj.getDay() === 0 ? 7 : fechaObj.getDay();
+
+            // Horarios del negocio
+            const { data: horarios } = await supabaseClient
+                .from("horarios")
+                .select("*")
+                .eq("negocio_id", negocioId)
+                .eq("dia_semana", diaSemana)
+                .eq("activo", true);
+
+            if (!horarios || horarios.length === 0) return;
+
+            // Citas existentes
+            const { data: citas } = await supabaseClient
+                .from("citas")
+                .select("hora, servicio")
+                .eq("negocio_id", negocioId)
+                .eq("fecha", fecha);
+
+            const { data: serviciosData } = await supabaseClient
+                .from("servicios")
+                .select("nombre, duracion")
+                .eq("negocio_id", negocioId);
+
+            const mapaDuraciones = {};
+            (serviciosData || []).forEach(s => mapaDuraciones[s.nombre] = s.duracion);
+
+            const horasOcupadas = [];
+            (citas || []).forEach(cita => {
+                const dur = mapaDuraciones[cita.servicio] || 30;
+                let [h, m] = cita.hora.substring(0, 5).split(":").map(Number);
+
+                for (let i = 0; i < dur; i += 30) {
+                    horasOcupadas.push(
+                        String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0")
+                    );
+                    m += 30;
+                    if (m >= 60) {
+                        h++;
+                        m -= 60;
+                    }
+                }
+            });
+
+            const horas = generarHorasDesdeHorarios(horarios);
+
+            horas.forEach(hora => {
+                let libre = true;
+                let [h, m] = hora.split(":").map(Number);
+
+                for (let i = 0; i < duracion; i += 30) {
+                    const bloque = String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
+                    if (horasOcupadas.includes(bloque)) {
+                        libre = false;
+                    }
+                    m += 30;
+                    if (m >= 60) {
+                        h++;
+                        m -= 60;
+                    }
+                }
+
+                const option = document.createElement("option");
+                option.value = hora;
+
+                if (libre) {
+                    option.textContent = hora + " — Disponible";
+                } else {
+                    option.textContent = hora + " — Ocupada";
+                    option.disabled = true;
+                }
+
+                selector.appendChild(option);
+            });
+        }
+
+        async function editarCita(id) {
+            const cita = todasLasCitas.find(c => c.id == id);
+            if (!cita) return;
+
+            document.getElementById("modalEditar").style.display = "flex";
+            document.getElementById("editarId").value = cita.id;
+            document.getElementById("editarNombre").value = cita.nombre;
+            document.getElementById("editarTelefono").value = cita.telefono;
+            document.getElementById("editarFecha").value = cita.fecha;
+
+            const selectorServicio = document.getElementById("editarServicio");
+            selectorServicio.value = cita.servicio;
+
+            await cargarHorasEditar(cita.fecha, cita.servicio, cita.hora.substring(0, 5));
+        }
+
+        async function cargarHorasEditar(fecha, servicio, horaActual = "") {
+            const selectorHora = document.getElementById("editarHora");
+            selectorHora.innerHTML = "";
+
+            if (!fecha || !servicio) return;
+
+            // Buscar duración del servicio
+            const { data: servicioData } = await supabaseClient
+                .from("servicios")
+                .select("duracion")
+                .eq("negocio_id", negocioId)
+                .eq("nombre", servicio)
+                .single();
+
+            const duracion = servicioData?.duracion || 30;
+
+            // Día de la semana
+            const fechaObj = new Date(fecha + "T00:00:00");
+            let diaSemana = fechaObj.getDay();
+            if (diaSemana === 0) diaSemana = 7;
+
+            // Horario del negocio
+            const { data: horarios } = await supabaseClient
+                .from("horarios")
+                .select("hora_inicio,hora_fin")
+                .eq("negocio_id", negocioId)
+                .eq("dia_semana", diaSemana)
+                .eq("activo", true);
+
+            if (!horarios || horarios.length === 0) {
+                selectorHora.innerHTML = `<option value="">Negocio cerrado</option>`;
+                return;
+            }
+
+            // Citas del día (excluyendo la cita actual que estamos editando si es necesario, o manejando la hora actual)
+            const idCitaActual = document.getElementById("editarId").value;
+            const { data: citas } = await supabaseClient
+                .from("citas")
+                .select("id, hora, servicio")
+                .eq("negocio_id", negocioId)
+                .eq("fecha", fecha)
+                .neq("id", idCitaActual);
+
+            const { data: serviciosData } = await supabaseClient
+                .from("servicios")
+                .select("nombre, duracion")
+                .eq("negocio_id", negocioId);
+
+            const mapaDuraciones = {};
+            (serviciosData || []).forEach(s => mapaDuraciones[s.nombre] = s.duracion);
+
+            const horasOcupadas = [];
+            (citas || []).forEach(cita => {
+                const dur = mapaDuraciones[cita.servicio] || 30;
+                let [h, m] = cita.hora.substring(0, 5).split(":").map(Number);
+
+                for (let i = 0; i < dur; i += 30) {
+                    horasOcupadas.push(
+                        String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0")
+                    );
+                    m += 30;
+                    if (m >= 60) {
+                        h++;
+                        m -= 60;
+                    }
+                }
+            });
+
+            const horas = generarHorasDesdeHorarios(horarios);
+
+            horas.forEach(hora => {
+                let libre = true;
+                let [h, m] = hora.split(":").map(Number);
+
+                for (let i = 0; i < duracion; i += 30) {
+                    const bloque = String(h).padStart(2, "0") + ":" + String(m).padStart(2, "0");
+                    if (horasOcupadas.includes(bloque)) {
+                        libre = false;
+                    }
+                    m += 30;
+                    if (m >= 60) {
+                        h++;
+                        m -= 60;
+                    }
+                }
+
+                const option = document.createElement("option");
+                option.value = hora;
+
+                if (libre || hora === normalizarHora(horaActual)) {
+                    option.textContent = hora + (libre ? " — Disponible" : " — Actual");
+                } else {
+                    option.textContent = hora + " — Ocupada";
+                    option.disabled = true;
+                }
+
+                if (hora === normalizarHora(horaActual)) {
+                    option.selected = true;
+                }
+
+                selectorHora.appendChild(option);
+            });
+        }
+
+        function cerrarEditarCita() {
+            document.getElementById("modalEditar").style.display = "none";
+            document.getElementById("mensajeEditar").innerText = "";
+        }
+        document.getElementById("nuevoServicio").addEventListener("change", cargarHorasNuevaCita);
+        document.getElementById("nuevaFecha").addEventListener("change", cargarHorasNuevaCita);
+
+        document.getElementById("editarFecha").addEventListener("change", () => {
+            cargarHorasEditar(
+                document.getElementById("editarFecha").value,
+                document.getElementById("editarServicio").value
+            );
         });
 
-    if (error) {
+        document.getElementById("editarServicio").addEventListener("change", () => {
+            cargarHorasEditar(
+                document.getElementById("editarFecha").value,
+                document.getElementById("editarServicio").value
+            );
+        });
 
-        if (error.code === "23505") {
-            mensaje.innerText = "❌ Esa hora ya está ocupada.";
-        } else {
-            console.error(error);
-            mensaje.innerText = "❌ No se pudo guardar la cita.";
+        async function crearCitaManual() {
+            const mensaje = document.getElementById("mensajeNuevaCita");
+            const nombre = document.getElementById("nuevaNombre").value.trim();
+            const telefono = document.getElementById("nuevoTelefono").value.trim();
+            const servicio = document.getElementById("nuevoServicio").value;
+            const fecha = document.getElementById("nuevaFecha").value;
+            const hora = document.getElementById("nuevaHora").value;
+
+            if (!nombre || !telefono || !servicio || !fecha || !hora) {
+                mensaje.innerText = "⚠️ Completa todos los campos.";
+                return;
+            }
+
+            mensaje.innerText = "Guardando cita...";
+
+            await supabaseClient.from("clientes").upsert(
+                { negocio_id: negocioId, nombre, telefono },
+                { onConflict: "negocio_id,telefono" }
+            );
+
+            const { error } = await supabaseClient.from("citas").insert({
+                negocio_id: negocioId,
+                nombre,
+                telefono,
+                servicio,
+                fecha,
+                hora
+            });
+
+            if (error) {
+                if (error.code === "23505") {
+                    mensaje.innerText = "❌ Esa hora ya está ocupada.";
+                    await cargarHorasNuevaCita();
+                } else {
+                    console.error(error);
+                    mensaje.innerText = "❌ No se pudo guardar la cita.";
+                }
+                return;
+            }
+
+            mensaje.innerText = "✅ Cita creada correctamente.";
+            document.getElementById("nuevaNombre").value = "";
+            document.getElementById("nuevoTelefono").value = "";
+            document.getElementById("nuevoServicio").value = "";
+            document.getElementById("nuevaFecha").value = "";
+            document.getElementById("nuevaHora").innerHTML = `<option value="">Selecciona una hora</option>`;
+            await cargarCitas();
         }
-
-        return;
-    }
-
-    mensaje.innerText = "✅ Cita creada correctamente.";
-
-    document.getElementById("nuevaNombre").value = "";
-    document.getElementById("nuevoTelefono").value = "";
-    document.getElementById("nuevoServicio").value = "";
-    document.getElementById("nuevaFecha").value = "";
-    document.getElementById("nuevaHora").value = "";
-
-    await cargarClientes();
-    await cargarCitas();
-}
 
         async function cargarDiasCerrados() {
             const lista = document.getElementById("listaDiasCerrados");
             const { data } = await supabaseClient.from("dias_cerrados").select("*").eq("negocio_id", negocioId).order("fecha", { ascending: true });
+
+            diasCerrados = (data || []).map(d => d.fecha);
 
             if (!data || data.length === 0) {
                 lista.innerHTML = `<p>No hay días cerrados.</p>`;
@@ -1204,8 +1408,7 @@
         }
 
         async function cargarCitas() {
-            const lista = document.getElementById("listaCitas");
-            const { data } = await supabaseClient.from("citas").select("*").order("fecha", { ascending: true }).order("hora", { ascending: true });
+            const { data } = await supabaseClient.from("citas").select("*").eq("negocio_id", negocioId).order("fecha", { ascending: true }).order("hora", { ascending: true });
 
             todasLasCitas = data || [];
             document.getElementById("numeroCitas").innerText = todasLasCitas.length;
@@ -1246,7 +1449,7 @@
                 lista.innerHTML += `
                     <div class="cita">
                         <div class="cabeceraCita">
-                            <div class="hora">${cita.hora}</div>
+                            <div class="hora">${cita.hora.substring(0, 5)}</div>
                             <div class="fecha">📅 ${cita.fecha}</div>
                         </div>
                         <h2>${cita.nombre}</h2>
@@ -1315,17 +1518,11 @@
             document.getElementById("editarNombre").value = cita.nombre;
             document.getElementById("editarTelefono").value = cita.telefono;
             document.getElementById("editarFecha").value = cita.fecha;
-            document.getElementById("editarHora").value = cita.hora.substring(0, 5);
 
-            const selector = document.getElementById("editarServicio");
-            selector.innerHTML = "";
-            const { data } = await supabaseClient.from("servicios").select("nombre, precio").eq("negocio_id", negocioId).eq("activo", true).order("precio");
-            if (data) {
-                data.forEach(s => {
-                    selector.innerHTML += `<option value="${s.nombre}">${s.nombre} - ${Number(s.precio).toFixed(2)} €</option>`;
-                });
-            }
-            selector.value = cita.servicio;
+            const selectorServicio = document.getElementById("editarServicio");
+            selectorServicio.value = cita.servicio;
+
+            await cargarHorasEditar(cita.fecha, cita.servicio, cita.hora.substring(0, 5));
         }
 
         function cerrarEditarCita() {
