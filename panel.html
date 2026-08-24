@@ -993,36 +993,129 @@
         }
 
         async function crearCitaManual() {
-            const mensaje = document.getElementById("mensajeNuevaCita");
-            const nombre = document.getElementById("nuevaNombre").value.trim();
-            const telefono = document.getElementById("nuevoTelefono").value.trim();
-            const servicio = document.getElementById("nuevoServicio").value;
-            const fecha = document.getElementById("nuevaFecha").value;
-            const hora = document.getElementById("nuevaHora").value;
 
-            if (!nombre || !telefono || !servicio || !fecha || !hora) {
-                mensaje.innerText = "⚠️ Completa todos los campos.";
-                return;
-            }
+    const mensaje = document.getElementById("mensajeNuevaCita");
 
-            mensaje.innerText = "Guardando cita...";
-            await supabaseClient.from("clientes").upsert({ negocio_id: negocioId, nombre, telefono }, { onConflict: "negocio_id,telefono" });
+    const nombre = document.getElementById("nuevaNombre").value.trim();
+    const telefono = document.getElementById("nuevoTelefono").value.trim();
+    const servicio = document.getElementById("nuevoServicio").value;
+    const fecha = document.getElementById("nuevaFecha").value;
+    const hora = document.getElementById("nuevaHora").value;
 
-            const { error: errorCita } = await supabaseClient.from("citas").insert({ nombre, telefono, servicio, fecha, hora, negocio_id: negocioId });
+    if (!nombre || !telefono || !servicio || !fecha || !hora) {
+        mensaje.innerText = "⚠️ Completa todos los campos.";
+        return;
+    }
 
-            if (errorCita) {
-                mensaje.innerText = "❌ No se pudo guardar la cita.";
-                return;
-            }
+    if (fecha < obtenerFechaLocal()) {
+        mensaje.innerText = "⚠️ No puedes crear citas en días pasados.";
+        return;
+    }
 
-            mensaje.innerText = "✅ Cita creada correctamente.";
-            document.getElementById("nuevaNombre").value = "";
-            document.getElementById("nuevoTelefono").value = "";
-            document.getElementById("nuevoServicio").value = "";
-            document.getElementById("nuevaFecha").value = "";
-            document.getElementById("nuevaHora").value = "";
-            await cargarCitas();
+    mensaje.innerText = "Guardando cita...";
+
+    // Obtener duración de servicios
+    const { data: servicios } = await supabaseClient
+        .from("servicios")
+        .select("nombre, duracion")
+        .eq("negocio_id", negocioId);
+
+    const mapaDuraciones = {};
+
+    (servicios || []).forEach((s) => {
+        mapaDuraciones[s.nombre] = s.duracion;
+    });
+
+    const duracionNueva = mapaDuraciones[servicio] || 30;
+
+    // Comprobar solapes
+    const { data: citasExistentes } = await supabaseClient
+        .from("citas")
+        .select("hora, servicio")
+        .eq("fecha", fecha)
+        .eq("negocio_id", negocioId);
+
+    const nuevaHoraInicio =
+        Number(hora.substring(0,2)) * 60 +
+        Number(hora.substring(3,5));
+
+    const nuevaHoraFin =
+        nuevaHoraInicio + duracionNueva;
+
+    let haySolape = false;
+
+    (citasExistentes || []).forEach((cita) => {
+
+        const inicio =
+            Number(cita.hora.substring(0,2)) * 60 +
+            Number(cita.hora.substring(3,5));
+
+        const fin =
+            inicio + (mapaDuraciones[cita.servicio] || 30);
+
+        if (
+            nuevaHoraInicio < fin &&
+            nuevaHoraFin > inicio
+        ) {
+            haySolape = true;
         }
+
+    });
+
+    if (haySolape) {
+        mensaje.innerText = "❌ Ese horario ya está ocupado.";
+        return;
+    }
+
+    // Guardar cliente
+    await supabaseClient
+        .from("clientes")
+        .upsert(
+            {
+                negocio_id: negocioId,
+                nombre,
+                telefono
+            },
+            {
+                onConflict: "negocio_id,telefono"
+            }
+        );
+
+    // Guardar cita
+    const { error } = await supabaseClient
+        .from("citas")
+        .insert({
+            negocio_id: negocioId,
+            nombre,
+            telefono,
+            servicio,
+            fecha,
+            hora
+        });
+
+    if (error) {
+
+        if (error.code === "23505") {
+            mensaje.innerText = "❌ Esa hora ya está ocupada.";
+        } else {
+            console.error(error);
+            mensaje.innerText = "❌ No se pudo guardar la cita.";
+        }
+
+        return;
+    }
+
+    mensaje.innerText = "✅ Cita creada correctamente.";
+
+    document.getElementById("nuevaNombre").value = "";
+    document.getElementById("nuevoTelefono").value = "";
+    document.getElementById("nuevoServicio").value = "";
+    document.getElementById("nuevaFecha").value = "";
+    document.getElementById("nuevaHora").value = "";
+
+    await cargarClientes();
+    await cargarCitas();
+}
 
         async function cargarDiasCerrados() {
             const lista = document.getElementById("listaDiasCerrados");
