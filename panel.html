@@ -18,10 +18,7 @@
             padding: 30px 20px;
         }
 
-        /* =========================
-            LOGIN
-        ========================= */
-
+        /* LOGIN */
         #login {
             max-width: 400px;
             margin: 80px auto;
@@ -70,10 +67,7 @@
             font-weight: bold;
         }
 
-        /* =========================
-            PANEL
-        ========================= */
-
+        /* PANEL */
         #panel {
             display: none;
         }
@@ -133,10 +127,7 @@
             color: #111;
         }
 
-        /* =========================
-            RESUMEN
-        ========================= */
-
+        /* RESUMEN */
         .resumen-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -157,10 +148,7 @@
             margin-top: 5px;
         }
 
-        /* =========================
-            FILTROS
-        ========================= */
-
+        /* FILTROS */
         .filtros {
             background-color: white;
             padding: 15px;
@@ -186,10 +174,7 @@
             color: white;
         }
 
-        /* =========================
-            SECCIONES Y HORARIOS
-        ========================= */
-
+        /* SECCIONES Y HORARIOS */
         .seccion {
             background-color: white;
             padding: 25px;
@@ -262,10 +247,7 @@
             margin-top: 15px;
         }
 
-        /* =========================
-            CITAS
-        ========================= */
-
+        /* CITAS */
         .cita {
             background-color: white;
             padding: 20px;
@@ -346,10 +328,7 @@
             border-radius: 15px;
         }
 
-        /* =========================
-            CALENDARIO
-        ========================= */
-
+        /* CALENDARIO */
         #calendario {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
@@ -403,10 +382,7 @@
             transform: translateX(-50%);
         }
 
-        /* =========================
-            NUEVA CITA
-        ========================= */
-
+        /* NUEVA CITA */
         #mensajeNuevaCita {
             margin-top: 15px;
             font-weight: bold;
@@ -430,10 +406,7 @@
             gap: 10px;
         }
 
-        /* =========================
-            AGENDA DEL DÍA
-        ========================= */
-
+        /* AGENDA DEL DÍA */
         #agendaDia {
             display: flex;
             flex-direction: column;
@@ -499,10 +472,7 @@
             color: rgba(255, 255, 255, 0.85);
         }
 
-        /* =========================
-            MODAL EDITAR CITA
-        ========================= */
-
+        /* MODAL EDITAR CITA */
         .modalEditar {
             position: fixed;
             inset: 0;
@@ -557,10 +527,7 @@
             font-weight: bold;
         }
 
-        /* =========================
-            DÍAS CERRADOS
-        ========================= */
-
+        /* DÍAS CERRADOS */
         .diaCerrado {
             display: flex;
             justify-content: space-between;
@@ -595,12 +562,10 @@
             .resumen-grid {
                 grid-template-columns: 1fr;
             }
-
             .horario-cabecera {
                 align-items: flex-start;
                 flex-direction: column;
             }
-
             .horario-controles {
                 width: 100%;
             }
@@ -610,10 +575,7 @@
 
 <body>
 
-    <!-- ==================================================
-     LOGIN
-================================================== -->
-
+    <!-- LOGIN -->
     <div id="login">
         <h1>💇 Panel del negocio</h1>
         <p>Acceso exclusivo para propietarios</p>
@@ -623,10 +585,7 @@
         <p id="mensajeLogin"></p>
     </div>
 
-    <!-- ==================================================
-     PANEL
-================================================== -->
-
+    <!-- PANEL -->
     <div id="panel" class="contenedor">
 
         <header>
@@ -777,7 +736,7 @@
 
     </div>
 
-    <!-- SUPABASE -->
+    <!-- SUPABASE Y JAVASCRIPT -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = "https://gzizbwwqhogynshbyaem.supabase.co";
