@@ -1,25 +1,15 @@
-html
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Peluquería Ane</title>
 
-
     <style>
-
         * {
             box-sizing: border-box;
         }
-
 
         body {
             font-family: Arial, sans-serif;
@@ -29,18 +19,15 @@ html
             margin: 0;
         }
 
-
         h1 {
             font-size: 40px;
             margin-bottom: 10px;
         }
 
-
         .subtitulo {
             font-size: 20px;
             margin-bottom: 30px;
         }
-
 
         button {
             background-color: #111;
@@ -52,11 +39,9 @@ html
             cursor: pointer;
         }
 
-
         button:hover {
             opacity: 0.8;
         }
-
 
         #reserva {
             display: none;
@@ -66,7 +51,6 @@ html
             padding: 30px;
             border-radius: 15px;
         }
-
 
         select,
         input {
@@ -79,909 +63,406 @@ html
             font-size: 16px;
         }
 
-
         .campo {
             margin-bottom: 20px;
         }
-
 
         #mensaje {
             font-weight: bold;
             margin-top: 20px;
         }
 
-
         #estadoHora {
             font-weight: bold;
             margin-top: 10px;
         }
-
     </style>
-
 </head>
-
 
 <body>
 
-
-    <h1>
-        Peluquería Ane
-    </h1>
-
+    <h1>Peluquería Ane</h1>
 
     <p class="subtitulo">
         Reserva tu cita online
     </p>
 
-
     <button onclick="mostrarReserva()">
         Reservar cita
     </button>
 
-
     <div id="reserva">
 
-        <h2>
-            Reserva tu cita
-        </h2>
-
+        <h2>Reserva tu cita</h2>
 
         <!-- SERVICIO -->
-
         <div class="campo">
-
-            <p>
-                Servicio
-            </p>
-
+            <p>Servicio</p>
             <select id="servicio">
-
-                <option value="">
-                    Selecciona un servicio
-                </option>
-
-                <option value="Corte">
-                    Corte - 15 €
-                </option>
-
-                <option value="Corte + barba">
-                    Corte + barba - 22 €
-                </option>
-
-                <option value="Tinte">
-                    Tinte - 35 €
-                </option>
-
+                <option value="">Cargando servicios...</option>
             </select>
-
         </div>
-
 
         <!-- FECHA -->
-
         <div class="campo">
-
-            <p>
-                Fecha
-            </p>
-
-            <input
-                type="date"
-                id="fecha"
-            >
-
+            <p>Fecha</p>
+            <input type="date" id="fecha">
             <p id="estadoHora"></p>
-
         </div>
-
 
         <!-- HORA -->
-
         <div class="campo">
-
-            <p>
-                Hora
-            </p>
-
+            <p>Hora</p>
             <select id="hora">
-
-                <option value="">
-                    Selecciona una hora
-                </option>
-
+                <option value="">Selecciona una hora</option>
             </select>
-
         </div>
-
 
         <!-- NOMBRE -->
-
         <div class="campo">
-
-            <p>
-                Nombre
-            </p>
-
-            <input
-                type="text"
-                id="nombre"
-                placeholder="Tu nombre"
-            >
-
+            <p>Nombre</p>
+            <input type="text" id="nombre" placeholder="Tu nombre">
         </div>
-
 
         <!-- TELÉFONO -->
-
         <div class="campo">
-
-            <p>
-                Teléfono
-            </p>
-
-            <input
-                type="tel"
-                id="telefono"
-                placeholder="Tu teléfono"
-            >
-
+            <p>Teléfono</p>
+            <input type="tel" id="telefono" placeholder="Tu teléfono">
         </div>
-
 
         <button onclick="confirmarCita()">
             Confirmar cita
         </button>
 
-
         <p id="mensaje"></p>
 
     </div>
 
-
-
     <!-- SUPABASE -->
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-
     <script>
-
-
         // ==================================================
-        // SUPABASE
+        // SUPABASE Y VARIABLES GLOBALES
         // ==================================================
+        const SUPABASE_URL = "https://gzizbwwqhogynshbyaem.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_UCOjOFLBWhvSNbH8mtGChA_Oix4NCYE";
 
-        const SUPABASE_URL =
-            "https://gzizbwwqhogynshbyaem.supabase.co";
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        let diasCerrados = [];
+        let negocioIdGlobal = null;
 
-        const SUPABASE_KEY =
-            "sb_publishable_UCOjOFLBWhvSNbH8mtGChA_Oix4NCYE";
+        // ==========================================
+        // OBTENER ID DEL NEGOCIO
+        // ==========================================
+        async function obtenerNegocioId() {
+            if (negocioIdGlobal) return negocioIdGlobal;
 
+            const { data: negocio, error } = await supabaseClient
+                .from("negocios")
+                .select("id")
+                .eq("nombre", "Peluquería Ane")
+                .single();
 
-        const supabaseClient =
-            window.supabase.createClient(
-                SUPABASE_URL,
-                SUPABASE_KEY
-            );
+            if (error || !negocio) {
+                console.error("Error obteniendo negocio:", error);
+                return null;
+            }
 
+            negocioIdGlobal = negocio.id;
+            return negocioIdGlobal;
+        }
 
+        // ==========================================
+        // CARGAR SERVICIOS DESDE SUPABASE
+        // ==========================================
+        async function cargarServicios() {
+            const selector = document.getElementById("servicio");
+            selector.innerHTML = `<option value="">Cargando servicios...</option>`;
+
+            const idNegocio = await obtenerNegocioId();
+            if (!idNegocio) {
+                selector.innerHTML = `<option value="">No hay servicios disponibles</option>`;
+                return;
+            }
+
+            const { data: servicios, error } = await supabaseClient
+                .from("servicios")
+                .select("nombre, precio, duracion")
+                .eq("negocio_id", idNegocio)
+                .eq("activo", true)
+                .order("precio");
+
+            if (error) {
+                selector.innerHTML = `<option value="">Error cargando servicios</option>`;
+                console.error(error);
+                return;
+            }
+
+            selector.innerHTML = `<option value="">Selecciona un servicio</option>`;
+
+            servicios.forEach((servicio) => {
+                selector.innerHTML += `
+                    <option value="${servicio.nombre}">
+                        ${servicio.nombre} (${servicio.duracion} min) - ${Number(servicio.precio).toFixed(2)} €
+                    </option>
+                `;
+            });
+        }
+
+        // ==========================================
+        // CARGAR DÍAS CERRADOS
+        // ==========================================
+        async function cargarDiasCerrados() {
+            const idNegocio = await obtenerNegocioId();
+            if (!idNegocio) return;
+
+            const { data, error } = await supabaseClient
+                .from("dias_cerrados")
+                .select("fecha")
+                .eq("negocio_id", idNegocio);
+
+            if (error) {
+                console.error("Error cargando días cerrados:", error);
+                return;
+            }
+
+            diasCerrados = (data || []).map(d => d.fecha);
+        }
 
         // ==================================================
         // MOSTRAR RESERVA
         // ==================================================
-
         function mostrarReserva() {
-
-            document.getElementById(
-                "reserva"
-            ).style.display = "block";
-
+            document.getElementById("reserva").style.display = "block";
         }
-
-
 
         // ==================================================
         // FECHA MÍNIMA = HOY
         // ==================================================
-
         function obtenerFechaHoy() {
-
             const hoy = new Date();
-
             const año = hoy.getFullYear();
-
-            const mes = String(
-                hoy.getMonth() + 1
-            ).padStart(2, "0");
-
-            const dia = String(
-                hoy.getDate()
-            ).padStart(2, "0");
-
+            const mes = String(hoy.getMonth() + 1).padStart(2, "0");
+            const dia = String(hoy.getDate()).padStart(2, "0");
             return `${año}-${mes}-${dia}`;
-
         }
 
+        const campoFecha = document.getElementById("fecha");
+        campoFecha.min = obtenerFechaHoy();
 
-
-        // ==================================================
-        // CONFIGURAR FECHA MÍNIMA
-        // ==================================================
-
-        const campoFecha =
-            document.getElementById("fecha");
-
-
-        campoFecha.min =
-            obtenerFechaHoy();
-
-
-
-        // ==================================================
-        // CAMBIO DE FECHA
-        // ==================================================
-
-        campoFecha.addEventListener(
-            "change",
-            cargarHoras
-        );
-
-
+        campoFecha.addEventListener("change", cargarHoras);
 
         // ==================================================
         // CARGAR HORAS
         // ==================================================
-
         async function cargarHoras() {
-
-            const fecha =
-                document.getElementById(
-                    "fecha"
-                ).value;
-
-
-            const selectorHora =
-                document.getElementById(
-                    "hora"
-                );
-
-
-            const estadoHora =
-                document.getElementById(
-                    "estadoHora"
-                );
-
+            const fecha = document.getElementById("fecha").value;
+            const selectorHora = document.getElementById("hora");
+            const estadoHora = document.getElementById("estadoHora");
 
             selectorHora.innerHTML = `
-
                 <option value="">
                     Selecciona una hora
                 </option>
-
             `;
 
-
             if (!fecha) {
-
                 estadoHora.innerText = "";
-
                 return;
-
             }
 
-
-
-            // ==============================================
-            // COMPROBAR QUE LA FECHA NO SEA ANTERIOR A HOY
-            // ==============================================
-
-            const fechaHoy =
-                obtenerFechaHoy();
-
-
+            const fechaHoy = obtenerFechaHoy();
             if (fecha < fechaHoy) {
-
-                estadoHora.innerText =
-                    "❌ No se pueden reservar citas en fechas pasadas.";
-
-                document.getElementById(
-                    "fecha"
-                ).value = "";
-
+                estadoHora.innerText = "❌ No se pueden reservar citas en fechas pasadas.";
+                document.getElementById("fecha").value = "";
                 return;
-
             }
 
+            if (diasCerrados.includes(fecha)) {
+                estadoHora.innerText = "🏖️ La peluquería está cerrada este día.";
+                selectorHora.innerHTML = `<option value="">No disponible</option>`;
+                return;
+            }
 
+            estadoHora.innerText = "Comprobando horario...";
 
-            estadoHora.innerText =
-                "Comprobando horario...";
+            const fechaSeleccionada = new Date(fecha + "T00:00:00");
+            const diaJavaScript = fechaSeleccionada.getDay();
+            const diaSemana = diaJavaScript === 0 ? 7 : diaJavaScript;
 
+            const idNegocio = await obtenerNegocioId();
 
-
-            // ==================================================
-            // CALCULAR DÍA DE LA SEMANA
-            // ==================================================
-
-            const fechaSeleccionada =
-                new Date(
-                    fecha + "T00:00:00"
-                );
-
-
-            const diaJavaScript =
-                fechaSeleccionada.getDay();
-
-
-            const diaSemana =
-                diaJavaScript === 0
-                    ? 7
-                    : diaJavaScript;
-
-
-
-            // ==================================================
-            // OBTENER HORARIOS DEL NEGOCIO
-            // ==================================================
-
-            const {
-                data: horarios,
-                error: errorHorarios
-            } =
-                await supabaseClient
-
-                    .from("horarios")
-
-                    .select(
-                        "dia_semana, hora_inicio, hora_fin, activo"
-                    )
-
-                    .eq(
-                        "dia_semana",
-                        diaSemana
-                    )
-
-                    .eq(
-                        "activo",
-                        true
-                    );
-
-
+            const { data: horarios, error: errorHorarios } = await supabaseClient
+                .from("horarios")
+                .select("dia_semana, hora_inicio, hora_fin, activo")
+                .eq("negocio_id", idNegocio)
+                .eq("dia_semana", diaSemana)
+                .eq("activo", true);
 
             if (errorHorarios) {
-
-                console.error(
-                    "Error obteniendo horarios:",
-                    errorHorarios
-                );
-
-
-                estadoHora.innerText =
-                    "❌ No se pudo comprobar el horario.";
-
+                console.error("Error obteniendo horarios:", errorHorarios);
+                estadoHora.innerText = "❌ No se pudo comprobar el horario.";
                 return;
-
             }
 
-
-
-            // ==================================================
-            // NEGOCIO CERRADO
-            // ==================================================
-
-            if (
-                !horarios ||
-                horarios.length === 0
-            ) {
-
-                estadoHora.innerText =
-                    "🔴 La peluquería está cerrada este día.";
-
+            if (!horarios || horarios.length === 0) {
+                estadoHora.innerText = "🔴 La peluquería está cerrada este día.";
                 return;
-
             }
 
-
-
-            // ==================================================
-            // OBTENER HORAS OCUPADAS
-            // MEDIANTE FUNCIÓN SEGURA DE SUPABASE
-            // ==================================================
-
-            const {
-                data: citas,
-                error: errorCitas
-            } =
-                await supabaseClient
-
-                    .rpc(
-                        "horas_ocupadas",
-                        {
-                            fecha_consulta: fecha
-                        }
-                    );
-
-
+            const { data: citas, error: errorCitas } = await supabaseClient
+                .rpc("horas_ocupadas", { fecha_consulta: fecha });
 
             if (errorCitas) {
-
-                console.error(
-                    "Error obteniendo disponibilidad:",
-                    errorCitas
-                );
-
-
-                estadoHora.innerText =
-                    "❌ No se pudo comprobar la disponibilidad.";
-
+                console.error("Error obteniendo disponibilidad:", errorCitas);
+                estadoHora.innerText = "❌ No se pudo comprobar la disponibilidad.";
                 return;
-
             }
 
+            const horasOcupadas = (citas || []).map(cita => normalizarHora(cita.hora));
+            const horas = generarHorasDesdeHorarios(horarios);
 
+            horas.forEach(hora => {
+                const option = document.createElement("option");
+                option.value = hora;
 
-            // ==================================================
-            // NORMALIZAR HORAS OCUPADAS
-            // ==================================================
-
-            const horasOcupadas =
-                (citas || []).map(
-                    function(cita) {
-
-                        return normalizarHora(
-                            cita.hora
-                        );
-
-                    }
-                );
-
-
-
-            // ==================================================
-            // GENERAR HORAS
-            // ==================================================
-
-            const horas =
-                generarHorasDesdeHorarios(
-                    horarios
-                );
-
-
-
-            // ==================================================
-            // MOSTRAR HORAS
-            // ==================================================
-
-            horas.forEach(
-                function(hora) {
-
-                    const option =
-                        document.createElement(
-                            "option"
-                        );
-
-
-                    option.value =
-                        hora;
-
-
-                    if (
-                        horasOcupadas.includes(
-                            hora
-                        )
-                    ) {
-
-                        option.textContent =
-                            hora + " — Ocupada";
-
-                        option.disabled =
-                            true;
-
-                    } else {
-
-                        option.textContent =
-                            hora + " — Disponible";
-
-                    }
-
-
-                    selectorHora.appendChild(
-                        option
-                    );
-
+                if (horasOcupadas.includes(hora)) {
+                    option.textContent = hora + " — Ocupada";
+                    option.disabled = true;
+                } else {
+                    option.textContent = hora + " — Disponible";
                 }
-            );
 
+                selectorHora.appendChild(option);
+            });
 
+            const horasLibres = horas.filter(hora => !horasOcupadas.includes(hora));
 
-            // ==================================================
-            // COMPROBAR SI QUEDAN HORAS LIBRES
-            // ==================================================
-
-            const horasLibres =
-                horas.filter(
-                    function(hora) {
-
-                        return !horasOcupadas.includes(
-                            hora
-                        );
-
-                    }
-                );
-
-
-            if (
-                horasLibres.length === 0
-            ) {
-
-                estadoHora.innerText =
-                    "❌ No quedan horas disponibles.";
-
+            if (horasLibres.length === 0) {
+                estadoHora.innerText = "❌ No quedan horas disponibles.";
             } else {
-
-                estadoHora.innerText =
-                    "✅ Selecciona una hora disponible.";
-
+                estadoHora.innerText = "✅ Selecciona una hora disponible.";
             }
-
         }
-
-
-
-        // ==================================================
-        // NORMALIZAR HORA
-        // ==================================================
 
         function normalizarHora(hora) {
-
-            if (!hora) {
-
-                return "";
-
-            }
-
-
-            return hora.substring(
-                0,
-                5
-            );
-
+            if (!hora) return "";
+            return hora.substring(0, 5);
         }
 
-
-
-        // ==================================================
-        // GENERAR HORAS
-        // ==================================================
-
-        function generarHorasDesdeHorarios(
-            horarios
-        ) {
-
+        function generarHorasDesdeHorarios(horarios) {
             const horas = [];
 
+            horarios.forEach(horario => {
+                const inicio = normalizarHora(horario.hora_inicio);
+                const fin = normalizarHora(horario.hora_fin);
 
-            horarios.forEach(
-                function(horario) {
+                let [hora, minutos] = inicio.split(":").map(Number);
+                const [horaFin, minutosFin] = fin.split(":").map(Number);
 
-                    const inicio =
-                        normalizarHora(
-                            horario.hora_inicio
-                        );
+                while (hora < horaFin || (hora === horaFin && minutos < minutosFin)) {
+                    const horaTexto = String(hora).padStart(2, "0") + ":" + String(minutos).padStart(2, "0");
 
-
-                    const fin =
-                        normalizarHora(
-                            horario.hora_fin
-                        );
-
-
-                    let [
-                        hora,
-                        minutos
-                    ] =
-                        inicio
-                            .split(":")
-                            .map(Number);
-
-
-                    const [
-                        horaFin,
-                        minutosFin
-                    ] =
-                        fin
-                            .split(":")
-                            .map(Number);
-
-
-                    while (
-
-                        hora < horaFin
-
-                        ||
-
-                        (
-                            hora === horaFin &&
-                            minutos < minutosFin
-                        )
-
-                    ) {
-
-                        const horaTexto =
-
-                            String(hora)
-                                .padStart(2, "0")
-
-                            +
-
-                            ":"
-
-                            +
-
-                            String(minutos)
-                                .padStart(2, "0");
-
-
-                        if (
-                            !horas.includes(
-                                horaTexto
-                            )
-                        ) {
-
-                            horas.push(
-                                horaTexto
-                            );
-
-                        }
-
-
-                        minutos += 60;
-
-
-                        if (
-                            minutos >= 60
-                        ) {
-
-                            hora +=
-                                Math.floor(
-                                    minutos / 60
-                                );
-
-                            minutos =
-                                minutos % 60;
-
-                        }
-
+                    if (!horas.includes(horaTexto)) {
+                        horas.push(horaTexto);
                     }
 
-                }
-            );
+                    minutos += 30;
 
+                    if (minutos >= 60) {
+                        hora += Math.floor(minutos / 60);
+                        minutos = minutos % 60;
+                    }
+                }
+            });
 
             horas.sort();
-
-
             return horas;
-
         }
-
-
 
         // ==================================================
         // CONFIRMAR CITA
         // ==================================================
-
         async function confirmarCita() {
+            const servicio = document.getElementById("servicio").value;
+            const fecha = document.getElementById("fecha").value;
+            const hora = document.getElementById("hora").value;
+            const nombre = document.getElementById("nombre").value.trim();
+            const telefono = document.getElementById("telefono").value.trim();
+            const mensaje = document.getElementById("mensaje");
 
-            const servicio =
-                document.getElementById(
-                    "servicio"
-                ).value;
-
-
-            const fecha =
-                document.getElementById(
-                    "fecha"
-                ).value;
-
-
-            const hora =
-                document.getElementById(
-                    "hora"
-                ).value;
-
-
-            const nombre =
-                document.getElementById(
-                    "nombre"
-                ).value.trim();
-
-
-            const telefono =
-                document.getElementById(
-                    "telefono"
-                ).value.trim();
-
-
-            const mensaje =
-                document.getElementById(
-                    "mensaje"
-                );
-
-
-
-            // ==================================================
-            // COMPROBAR CAMPOS
-            // ==================================================
-
-            if (
-
-                servicio === "" ||
-                fecha === "" ||
-                hora === "" ||
-                nombre === "" ||
-                telefono === ""
-
-            ) {
-
-                mensaje.innerText =
-                    "⚠️ Completa todos los campos.";
-
+            if (servicio === "" || fecha === "" || hora === "" || nombre === "" || telefono === "") {
+                mensaje.innerText = "⚠️ Completa todos los campos.";
                 return;
-
             }
 
-
-
-            // ==================================================
-            // COMPROBAR FECHA PASADA
-            // ==================================================
-
-            const fechaHoy =
-                obtenerFechaHoy();
-
-
+            const fechaHoy = obtenerFechaHoy();
             if (fecha < fechaHoy) {
-
-                mensaje.innerText =
-                    "❌ No se pueden reservar citas en fechas pasadas.";
-
+                mensaje.innerText = "❌ No se pueden reservar citas en fechas pasadas.";
                 return;
-
             }
 
+            mensaje.innerText = "Guardando cita...";
 
+            const idNegocio = await obtenerNegocioId();
 
-            mensaje.innerText =
-                "Guardando cita...";
+            // Guardar o actualizar cliente
+            await supabaseClient
+                .from("clientes")
+                .upsert({
+                    negocio_id: idNegocio,
+                    nombre: nombre,
+                    telefono: telefono
+                }, {
+                    onConflict: "negocio_id,telefono"
+                });
 
-
-
-            // ==================================================
-            // GUARDAR CITA EN SUPABASE
-            // ==================================================
-
-            const {
-                data,
-                error
-            } =
-                await supabaseClient
-
-                    .from("citas")
-
-                    .insert([
-
-                        {
-                            nombre: nombre,
-                            telefono: telefono,
-                            servicio: servicio,
-                            fecha: fecha,
-                            hora: hora
-                        }
-
-                    ])
-
-                    .select();
-
-
-
-            // ==================================================
-            // ERROR
-            // ==================================================
+            // Guardar cita
+            const { error } = await supabaseClient
+                .from("citas")
+                .insert([
+                    {
+                        nombre: nombre,
+                        telefono: telefono,
+                        servicio: servicio,
+                        fecha: fecha,
+                        hora: hora,
+                        negocio_id: idNegocio
+                    }
+                ])
+                .select();
 
             if (error) {
+                console.error("Error Supabase:", error);
 
-                console.error(
-                    "Error Supabase:",
-                    error
-                );
-
-
-
-                // ==============================================
-                // DOBLE RESERVA
-                // ==============================================
-
-                if (
-                    error.code === "23505"
-                ) {
-
-                    mensaje.innerText =
-                        "❌ Esa hora ya está ocupada. Elige otra.";
-
-
+                if (error.code === "23505") {
+                    mensaje.innerText = "❌ Esa hora ya está ocupada. Elige otra.";
                     cargarHoras();
-
-
                     return;
-
                 }
 
-
-
-                mensaje.innerText =
-                    "❌ No se pudo guardar la cita.";
-
+                mensaje.innerText = "❌ No se pudo guardar la cita.";
                 return;
-
             }
 
+            mensaje.innerText = "✅ ¡Cita reservada correctamente!";
 
-
-            // ==================================================
-            // RESERVA CORRECTA
-            // ==================================================
-
-            mensaje.innerText =
-                "✅ ¡Cita reservada correctamente!";
-
-
-
-            // ==================================================
-            // LIMPIAR FORMULARIO
-            // ==================================================
-
-            document.getElementById(
-                "servicio"
-            ).value = "";
-
-
-            document.getElementById(
-                "fecha"
-            ).value = "";
-
-
-            document.getElementById(
-                "hora"
-            ).innerHTML = `
-
-                <option value="">
-                    Selecciona una hora
-                </option>
-
-            `;
-
-
-            document.getElementById(
-                "nombre"
-            ).value = "";
-
-
-            document.getElementById(
-                "telefono"
-            ).value = "";
-
-
-            document.getElementById(
-                "estadoHora"
-            ).innerText = "";
-
+            // Limpiar formulario
+            document.getElementById("servicio").value = "";
+            document.getElementById("fecha").value = "";
+            document.getElementById("hora").innerHTML = `<option value="">Selecciona una hora</option>`;
+            document.getElementById("nombre").value = "";
+            document.getElementById("telefono").value = "";
+            document.getElementById("estadoHora").innerText = "";
         }
 
+        // Inicializar datos al cargar la página
+        cargarServicios();
+        cargarDiasCerrados();
     </script>
 
 </body>
 
 </html>
-
